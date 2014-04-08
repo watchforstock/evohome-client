@@ -23,7 +23,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+   temperature
+   hotwater
 
 Indices and tables
 ==================
