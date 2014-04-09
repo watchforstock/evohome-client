@@ -7,6 +7,8 @@ Set hot water on
 .. code-block:: python
 
     client.set_dhw_on() # Permanent
+    
+    
 
 Set hot water off
 -----------------

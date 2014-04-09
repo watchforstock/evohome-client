@@ -17,6 +17,14 @@ Install the evohome client library:
 
     pip install ./evohome-client
 
+Instantiating the client
+------------------------
+
+.. code-block:: python
+
+    from evohomeclient import EvohomeClient
+    
+    client = EvohomeClient('username', 'password')
 
 Contents:
 
@@ -25,6 +33,7 @@ Contents:
 
    temperature
    hotwater
+   modes
 
 Indices and tables
 ==================
