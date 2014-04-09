@@ -10,8 +10,8 @@ class EvohomeClient:
         self.full_data = None
         self.gateway_data = None
         
-    def _populate_full_data(self):
-        if self.full_data is None:
+    def _populate_full_data(self, force_refresh=False):
+        if self.full_data is None or force_refresh:
             self._populate_user_info()
             userId = self.user_data['userInfo']['userID']
             sessionId = self.user_data['sessionId']
@@ -52,8 +52,8 @@ class EvohomeClient:
             
         return self.user_data
         
-    def temperatures(self):
-        self._populate_full_data()
+    def temperatures(self, force_refresh=False):
+        self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
             yield {'thermostat': device['thermostatModelType'],
                     'id': device['deviceID'],
