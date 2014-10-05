@@ -1,3 +1,4 @@
+from __future__ import print_function
 import requests
 import json
 import time
@@ -74,7 +75,7 @@ class EvohomeClient:
         self._populate_full_data()
         url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/commTasks?commTaskId=%s' % task_id
         response = requests.get(url, headers=self.headers)
-        print response.content
+        
         return json.loads(response.content)['state']
     
     def _get_task_id(self, response):
