@@ -2,6 +2,7 @@ from __future__ import print_function
 import requests
 import json
 import time
+import codecs
 
 class EvohomeClient:
     def __init__(self, username, password):
@@ -10,7 +11,11 @@ class EvohomeClient:
         self.user_data = None
         self.full_data = None
         self.gateway_data = None
-        
+        self.reader = codecs.getdecoder("utf-8")
+    
+    def _convert(self, object):
+        return json.loads(self.reader(object)[0])
+
     def _populate_full_data(self, force_refresh=False):
         if self.full_data is None or force_refresh:
             self._populate_user_info()
@@ -23,7 +28,7 @@ class EvohomeClient:
 
             response = requests.get(url,data=json.dumps(self.postdata),headers=self.headers)
 
-            self.full_data = json.loads(response.content)[0]
+            self.full_data = self._convert(response.content)[0]
             
             self.location_id = self.full_data['locationID']
             
@@ -39,7 +44,8 @@ class EvohomeClient:
         if self.gateway_data is None:
             url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/gateways?locationId=%s&allData=False' % self.location_id
             response = requests.get(url, headers = self.headers)
-            self.gateway_data = json.loads(response.content)[0]
+            
+            self.gateway_data = self._convert(response.content)[0]
 
     def _populate_user_info(self):
         if self.user_data is None:
@@ -48,8 +54,7 @@ class EvohomeClient:
             self.headers = {'content-type':'application/json'}
 
             response = requests.post(url,data=json.dumps(self.postdata),headers=self.headers)
-
-            self.user_data = json.loads(response.content)
+            self.user_data = self._convert(response.content)
             
         return self.user_data
         
@@ -76,10 +81,10 @@ class EvohomeClient:
         url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/commTasks?commTaskId=%s' % task_id
         response = requests.get(url, headers=self.headers)
         
-        return json.loads(response.content)['state']
+        return self._convert(response.content)['state']
     
     def _get_task_id(self, response):
-        ret = json.loads(response.content)
+        ret = self._convert(response.content)
         
         if isinstance(ret, list):
             task_id = ret[0]['id']
