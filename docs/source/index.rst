@@ -17,23 +17,23 @@ Install the evohome client library:
 
     pip install ./evohome-client
 
-Instantiating the client
-------------------------
+Versions
+--------
 
-.. code-block:: python
+Honeywell currently have two version of their API.
 
-    from evohomeclient import EvohomeClient
-    
-    client = EvohomeClient('username', 'password')
+Version 1 is simpler, but doesn't have capabilities such as viewing and changing the schedules on the evohome system.
+
+Version 2 was released towards the end of October 2014 and has a lot more information available, including the functionality to change the schedules for individual zones.
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   temperature
-   hotwater
-   modes
+   api1/index
+   api2/index
+
 
 Indices and tables
 ==================
@@ -41,4 +41,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

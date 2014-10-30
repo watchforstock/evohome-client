@@ -10,6 +10,8 @@ class EvohomeClient:
         self.reader = codecs.getdecoder("utf-8")
         self.access_token = None
 
+        self._login()
+
     def _convert(self, object):
         return json.loads(self.reader(object)[0])
 
@@ -19,7 +21,7 @@ class EvohomeClient:
         else:
             return location
 
-    def login(self):
+    def _login(self):
         url = 'https://rs.alarmnet.com:443/TotalConnectComfort/Auth/OAuth/Token'
         headers = {
             'Authorization':	'Basic YjAxM2FhMjYtOTcyNC00ZGJkLTg4OTctMDQ4YjlhYWRhMjQ5OnRlc3Q=',
