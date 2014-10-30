@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name = 'evohomeclient',
-	version = '0.1.0',
+	version = '0.2.0',
 	description = 'Python client for connecting to the Evohome webservice',
 	url = 'https://github.com/watchforstock/evohome-client/',
 	author = 'Andrew Stock',
@@ -11,6 +11,6 @@ setup(
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 	],
-	packages = ['evohomeclient'],
+	packages = ['evohomeclient', 'evohomeclient2'],
 	install_requires = ['requests']
 )
