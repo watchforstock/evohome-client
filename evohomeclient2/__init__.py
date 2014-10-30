@@ -60,6 +60,7 @@ class EvohomeClient:
         r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers)
 
         self.installation_info = self._convert(r.text)
+        self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
         return self.installation_info
 
@@ -88,5 +89,80 @@ class EvohomeClient:
         return self._convert(r.text)
 
     def set_zone_schedule(self, zone, zone_info):
-        r = requests.put('/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=self.headers)
+        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=self.headers)
         return self._convert(r.text)
+
+    def temperatures(self, location=None):
+        status = self.status(location)
+
+        if 'dhw' in status['gateways'][0]['temperatureControlSystems'][0]:
+            dhw = status['gateways'][0]['temperatureControlSystems'][0]['dhw']
+            yield {'thermostat': 'DOMESTIC_HOT_WATER',
+                    'id': dhw['dhwId'],
+                    'name': '',
+                    'temp': dhw['temperatureStatus']['temperature']}
+
+        for zone in status['gateways'][0]['temperatureControlSystems'][0]['zones']:
+            yield {'thermostat': 'EMEA_ZONE',
+                    'id': zone['zoneId'],
+                    'name': zone['name'],
+                    'temp': zone['temperatureStatus']['temperature']}
+
+    def _set_status(self, mode, until=None):
+
+        headers = dict(self.headers)
+        headers['Content-Type'] = 'application/json'
+
+        if until is None:
+            data = {"SystemMode":mode,"TimeUntil":None,"Permanent":True}
+        else:
+            data = {"SystemMode":mode,"TimeUntil":"%sT00:00:00Z" % until.strftime('%Y-%m-%d'),"Permanent":False}
+        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.system_id, data=json.dumps(data), headers=headers)
+
+    def set_status_normal(self):
+        self._set_status(0)
+
+    def set_status_custom(self, until=None):
+        self._set_status(6, until)
+
+    def set_status_eco(self, until=None):
+        self._set_status(2, until)
+
+    def set_status_away(self, until=None):
+        self._set_status(3, until)
+
+    def set_status_dayoff(self, until=None):
+        self._set_status(4, until)
+
+    def set_status_heatingoff(self, until=None):
+        self._set_status(1, until)
+
+    def _get_dhw_zone(self):
+        status = self.status(location)
+        return status['gateways'][0]['temperatureControlSystems'][0]['dhw']['dhwId']
+
+    def _set_dhw(self, data):
+        headers = dict(self.headers)
+        headers['Content-Type'] = 'application/json'
+        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/emea/api/v1/domesticHotWater/%s/state' % self._get_dhw_zone()
+
+        response = requests.put(url, data=json.dumps(data), headers=headers)
+
+
+    def set_dhw_on(self, until=None):
+        if until is None:
+            data = {"State":1,"Mode":1,"UntilTime":None}
+        else:
+            data = {"State":1,"Mode":2,"UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+        self._set_dhw(data)
+
+    def set_dhw_off(self, until=None):
+        if until is None:
+            data = {"State":0,"Mode":1,"UntilTime":None}
+        else:
+            data = {"State":0,"Mode":2,"UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+        self._set_dhw(data)
+
+    def set_dhw_auto(self):
+        data =  {"State":0,"Mode":0,"UntilTime":None}
+        self._set_dhw(data)
