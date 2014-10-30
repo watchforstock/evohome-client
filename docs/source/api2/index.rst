@@ -15,6 +15,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   temperature
+   hotwater
+   modes
    schedule
 
 Indices and tables
