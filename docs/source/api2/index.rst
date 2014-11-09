@@ -10,6 +10,15 @@ Instantiating the client
 
     client = EvohomeClient('username', 'password')
 
+To debug the communications, instantiate the client with the debug flag set:
+
+.. code-block:: python
+
+    from evohomeclient2 import EvohomeClient
+
+    client = EvohomeClient('username', 'password', debug=True)
+
+
 Contents:
 
 .. toctree::
@@ -19,3 +28,4 @@ Contents:
    hotwater
    modes
    schedule
+   backuprestore

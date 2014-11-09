@@ -2,18 +2,20 @@ from __future__ import print_function
 import requests
 import json
 import codecs
+from location import Location
+from base import EvohomeBase
 
-class EvohomeClient:
-    def __init__(self, username, password):
+class EvohomeClient(EvohomeBase):
+    def __init__(self, username, password, debug=False):
+        super(EvohomeClient, self).__init__(debug)
+
         self.username = username
         self.password = password
-        self.reader = codecs.getdecoder("utf-8")
+
         self.access_token = None
+        self.locations = []
 
         self._login()
-
-    def _convert(self, object):
-        return json.loads(self.reader(object)[0])
 
     def _get_location(self, location):
         if location is None:
@@ -21,6 +23,30 @@ class EvohomeClient:
         else:
             return location
 
+    def _get_single_heating_system(self):
+        # This allows a shortcut for some systems
+        location = None
+        gateway = None
+        control_system = None
+        
+        if len(self.locations)==1:
+            location = self.locations[0]
+        else:
+            raise Exception("More than one location available")
+            
+        if len(location._gateways)==1:
+            gateway = location._gateways[0]
+        else:
+            raise Exception("More than one gateway available")
+            
+        if len(gateway._control_systems)==1:
+            control_system = gateway._control_systems[0]
+        else:
+            raise Exception("More than one control system available")
+            
+        return control_system
+        
+        
     def _login(self):
         url = 'https://rs.alarmnet.com:443/TotalConnectComfort/Auth/OAuth/Token'
         headers = {
@@ -62,6 +88,9 @@ class EvohomeClient:
         self.installation_info = self._convert(r.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
+        for loc_data in self.installation_info:
+            self.locations.append(Location(self, loc_data))
+
         return self.installation_info
 
     def full_installation(self, location=None):
@@ -69,100 +98,33 @@ class EvohomeClient:
         r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers)
         return self._convert(r.text)
 
-    def get_simple_zones(self, location=None):
-        info = self.full_installation(location)
-        zones = info['gateways'][0]['temperatureControlSystems'][0]['zones']
-
-        return zones
-
     def gateway(self):
         r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/gateway', headers=self.headers)
         return self._convert(r.text)
 
-    def status(self, location=None):
-        location = self._get_location(location)
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % location, headers=self.headers)
-        return self._convert(r.text)
-
-    def zone_schedule(self, zone):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, headers=self.headers)
-        return self._convert(r.text)
-
-    def set_zone_schedule(self, zone, zone_info):
-        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=self.headers)
-        return self._convert(r.text)
-
-    def temperatures(self, location=None):
-        status = self.status(location)
-
-        if 'dhw' in status['gateways'][0]['temperatureControlSystems'][0]:
-            dhw = status['gateways'][0]['temperatureControlSystems'][0]['dhw']
-            yield {'thermostat': 'DOMESTIC_HOT_WATER',
-                    'id': dhw['dhwId'],
-                    'name': '',
-                    'temp': dhw['temperatureStatus']['temperature']}
-
-        for zone in status['gateways'][0]['temperatureControlSystems'][0]['zones']:
-            yield {'thermostat': 'EMEA_ZONE',
-                    'id': zone['zoneId'],
-                    'name': zone['name'],
-                    'temp': zone['temperatureStatus']['temperature']}
-
-    def _set_status(self, mode, until=None):
-
-        headers = dict(self.headers)
-        headers['Content-Type'] = 'application/json'
-
-        if until is None:
-            data = {"SystemMode":mode,"TimeUntil":None,"Permanent":True}
-        else:
-            data = {"SystemMode":mode,"TimeUntil":"%sT00:00:00Z" % until.strftime('%Y-%m-%d'),"Permanent":False}
-        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.system_id, data=json.dumps(data), headers=headers)
-
     def set_status_normal(self):
-        self._set_status(0)
+        return self._get_single_heating_system().set_status_normal()
 
     def set_status_custom(self, until=None):
-        self._set_status(6, until)
+        return self._get_single_heating_system().set_status_custom(until)
 
     def set_status_eco(self, until=None):
-        self._set_status(2, until)
+        return self._get_single_heating_system().set_status_eco(until)
 
     def set_status_away(self, until=None):
-        self._set_status(3, until)
+        return self._get_single_heating_system().set_status_away(until)
 
     def set_status_dayoff(self, until=None):
-        self._set_status(4, until)
+        return self._get_single_heating_system().set_status_dayoff(until)
 
     def set_status_heatingoff(self, until=None):
-        self._set_status(1, until)
+        return self._get_single_heating_system().set_status_heatingoff(until)
 
-    def _get_dhw_zone(self):
-        status = self.status(location)
-        return status['gateways'][0]['temperatureControlSystems'][0]['dhw']['dhwId']
+    def temperatures(self):
+        return self._get_single_heating_system().temperatures()
+    
+    def zone_schedules_backup(self, filename):
+        return self._get_single_heating_system().zone_schedules_backup(filename)
 
-    def _set_dhw(self, data):
-        headers = dict(self.headers)
-        headers['Content-Type'] = 'application/json'
-        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/emea/api/v1/domesticHotWater/%s/state' % self._get_dhw_zone()
-
-        response = requests.put(url, data=json.dumps(data), headers=headers)
-
-
-    def set_dhw_on(self, until=None):
-        if until is None:
-            data = {"State":1,"Mode":1,"UntilTime":None}
-        else:
-            data = {"State":1,"Mode":2,"UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
-        self._set_dhw(data)
-
-    def set_dhw_off(self, until=None):
-        if until is None:
-            data = {"State":0,"Mode":1,"UntilTime":None}
-        else:
-            data = {"State":0,"Mode":2,"UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
-        self._set_dhw(data)
-
-    def set_dhw_auto(self):
-        data =  {"State":0,"Mode":0,"UntilTime":None}
-        self._set_dhw(data)
+    def zone_schedules_restore(self, filename):
+        return self._get_single_heating_system().zone_schedules_restore(filename)

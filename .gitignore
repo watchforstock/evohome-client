@@ -54,3 +54,5 @@ coverage.xml
 docs/_build/
 
 test2.py
+/backup.json
+.idea
