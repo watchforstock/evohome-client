@@ -113,7 +113,25 @@ class EvohomeClient:
 
     def zone_schedule(self, zone):
         r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, headers=self.headers)
-        return self._convert(r.text)
+
+        mapping = [
+            ('dailySchedules', 'DailySchedules'),
+            ('dayOfWeek', 'DayOfWeek'),
+            ('temperature', 'TargetTemperature'),
+            ('timeOfDay', 'TimeOfDay'),
+            ('switchpoints', 'Switchpoints'),
+        ]
+        j = r.text
+        for f, t in mapping:
+            j = j.replace(f, t)
+
+        d = self._convert(j)
+
+        # change the day name string to a number offset (0 = Monday)
+        for day_of_week, schedule in enumerate(d['DailySchedules']):
+            schedule['DayOfWeek'] = day_of_week
+
+        return d
 
     def set_zone_schedule(self, zone, zone_info):
         # must only POST json, otherwise server API handler raises exceptions
