@@ -122,7 +122,10 @@ class EvohomeClient:
         except:
             raise EvohomeClientInvalidPostData('zone_info must be JSON')
 
-        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=self.headers)
+        headers = dict(self.headers)
+        headers['Content-Type'] = 'application/json'
+
+        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=headers)
         return self._convert(r.text)
 
     def temperatures(self, location=None):
