@@ -54,3 +54,6 @@ coverage.xml
 docs/_build/
 
 test2.py
+
+# PyCharm project file exclusion
+.idea
