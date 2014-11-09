@@ -22,6 +22,11 @@ requests_log = logging.getLogger("requests.packages.urllib3")
 requests_log.setLevel(logging.DEBUG)
 requests_log.propagate = True
 
+
+class EvohomeClientInvalidPostData(Exception):
+    pass
+
+
 class EvohomeClient:
     def __init__(self, username, password):
         self.username = username
@@ -108,6 +113,12 @@ class EvohomeClient:
         return self._convert(r.text)
 
     def set_zone_schedule(self, zone, zone_info):
+        # must only POST json, otherwise server API handler raises exceptions
+        try:
+            t1 = json.loads(zone_info)
+        except:
+            raise EvohomeClientInvalidPostData('zone_info must be JSON')
+
         r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=self.headers)
         return self._convert(r.text)
 
