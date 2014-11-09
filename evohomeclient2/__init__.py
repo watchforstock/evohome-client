@@ -114,6 +114,9 @@ class EvohomeClient:
     def zone_schedule(self, zone):
         r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, headers=self.headers)
 
+        # was request ok ?
+        r.raise_for_status()
+
         mapping = [
             ('dailySchedules', 'DailySchedules'),
             ('dayOfWeek', 'DayOfWeek'),
@@ -145,6 +148,49 @@ class EvohomeClient:
 
         r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % zone, data=zone_info, headers=headers)
         return self._convert(r.text)
+
+    def zone_schedules_backup(self, filename):
+
+        print("Backing up zone schedule to: %s" % (filename))
+
+        zones = self.get_simple_zones()
+
+        schedules = {}
+
+        for z in zones:
+            zone_id = z['zoneId']
+            name = z['name']
+
+            print("Retrieving zone schedule: %s - %s" % (zone_id, name))
+
+            s = self.zone_schedule(zone_id)
+            schedules[zone_id] = {'name': name, 'schedule': s}
+
+        schedule_db = json.dumps(schedules, indent=4)
+
+        with open(filename, 'w') as f:
+            f.write(schedule_db)
+
+        print("Backed up zone schedule to: %s" % filename)
+
+    def zone_schedules_restore(self, filename):
+
+        print("Restoring zone schedules from: %s" % filename)
+
+        with open(filename, 'r') as f:
+            schedule_db = f.read()
+            schedules = json.loads(schedule_db)
+
+            for zone_id in schedules:
+                zs = schedules[zone_id]
+                name = zs['name']
+                zone_info = zs['schedule']
+
+                print("Restoring schedule for: %s - %s" % (zone_id, name))
+
+                self.set_zone_schedule(zone_id, json.dumps(zone_info))
+
+        print("Restored zone schedules from: %s" % filename)
 
     def temperatures(self, location=None):
         status = self.status(location)
