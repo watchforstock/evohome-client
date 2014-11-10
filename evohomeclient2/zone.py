@@ -2,33 +2,12 @@ import json
 import requests
 from base import EvohomeBase, EvohomeClientInvalidPostData
 
-class Zone(EvohomeBase):
-
-    zone_id = None
-
-    def __init__(self, client, data=None):
-        super(Zone, self).__init__()
-        self.client = client
-        if data is not None:
-            self.__dict__.update(data)
-
-    def set_temperature(self, temperature, until=None):
-        if until is None:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUnitl":None}
-        else:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":2,"TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
-        self.client._set_heat_setpoint(data)
-
-    def _set_heat_setpoint(self, data):
-        url = 'https://rs.alarmnet.com//TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
-        response = requests.put(url, json.dumps(data), headers=self.client.headers)
-
-    def cancel_temp_override(self, zone):
-        data = {"HeatSetpointValue":0.0,"SetpointMode":0,"TimeUntil":None}
-        self._set_heat_setpoint(data)
+class ZoneBase(EvohomeBase):
+    def __init__(self):
+        super(ZoneBase, self).__init__()
 
     def schedule(self):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % self.zoneId, headers=self.client.headers)
+        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), headers=self.client.headers)
         # was request ok ?
         r.raise_for_status()
         mapping = [
@@ -37,6 +16,7 @@ class Zone(EvohomeBase):
             ('temperature', 'TargetTemperature'),
             ('timeOfDay', 'TimeOfDay'),
             ('switchpoints', 'Switchpoints'),
+            ('dhwState', 'DhwState'),
         ]
         j = r.text
         for f, t in mapping:
@@ -58,5 +38,30 @@ class Zone(EvohomeBase):
 
         headers = dict(self.client.headers)
         headers['Content-Type'] = 'application/json'
-        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/schedule' % self.zoneId, data=zone_info, headers=headers)
+        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), data=zone_info, headers=headers)
         return self._convert(r.text)
+
+class Zone(ZoneBase):
+
+    def __init__(self, client, data=None):
+        super(Zone, self).__init__()
+        self.client = client
+        self.zone_type = 'temperatureZone'
+        if data is not None:
+            self.__dict__.update(data)
+
+    def set_temperature(self, temperature, until=None):
+        if until is None:
+            data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUnitl":None}
+        else:
+            data = {"HeatSetpointValue":temperature,"SetpointMode":2,"TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+        self.client._set_heat_setpoint(data)
+
+    def _set_heat_setpoint(self, data):
+        url = 'https://rs.alarmnet.com//TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
+        response = requests.put(url, json.dumps(data), headers=self.client.headers)
+
+    def cancel_temp_override(self, zone):
+        data = {"HeatSetpointValue":0.0,"SetpointMode":0,"TimeUntil":None}
+        self._set_heat_setpoint(data)
+

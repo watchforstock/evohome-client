@@ -30,7 +30,7 @@ class ControlSystem(EvohomeBase):
                 self.zones_by_id[zone.zoneId] = zone
 
             if 'dhw' in data:
-                self.hotwater = HotWater(data['dhw'])
+                self.hotwater = HotWater(client, data['dhw'])
 
     def _set_status(self, mode, until=None):
 
@@ -64,28 +64,32 @@ class ControlSystem(EvohomeBase):
     def temperatures(self):
         status = self.location.status()
 
-        if 'dhw' in status['gateways'][0]['temperatureControlSystems'][0]:
-            dhw = status['gateways'][0]['temperatureControlSystems'][0]['dhw']
-            print(dhw)
+        if self.hotwater:
             yield {'thermostat': 'DOMESTIC_HOT_WATER',
-                    'id': dhw['dhwId'],
+                    'id': self.hotwater.dhwId,
                     'name': '',
-                    'temp': dhw['temperatureStatus']['temperature'],
+                    'temp': self.hotwater.temperatureStatus['temperature'],
                     'setpoint': ''
                   }
 
-        for zone in status['gateways'][0]['temperatureControlSystems'][0]['zones']:
+        for zone in self._zones:
             yield {'thermostat': 'EMEA_ZONE',
-                    'id': zone['zoneId'],
-                    'name': zone['name'],
-                    'temp': zone['temperatureStatus']['temperature'],
-                    'setpoint': zone['heatSetpointStatus']['targetTemperature']
+                    'id': zone.zoneId,
+                    'name': zone.name,
+                    'temp': zone.temperatureStatus['temperature'],
+                    'setpoint': zone.heatSetpointStatus['targetTemperature']
                   }
 
     def zone_schedules_backup(self, filename):
         print("Backing up zone schedule to: %s" % (filename))
 
         schedules = {}
+        
+        if self.hotwater:
+            print("Retrieving DHW schedule: %s" % self.hotwater.zoneId)
+            s = self.hotwater.schedule()
+            schedules[self.hotwater.zoneId] = {'name': 'Domestic Hot Water', 'schedule': s}
+        
         for z in self._zones:
             zone_id = z.zoneId
             name = z.name
@@ -110,5 +114,9 @@ class ControlSystem(EvohomeBase):
                 name = zone_schedule['name']
                 zone_info = zone_schedule['schedule']
                 print("Restoring schedule for: %s - %s" % (zone_id, name))
-                self.zones_by_id[zone_id].set_schedule(json.dumps(zone_info))
+                
+                if self.hotwater and self.hotwater.zoneId==zone_id:
+                    self.hotwater.set_schedule(json.dumps(zone_info))
+                else:
+                    self.zones_by_id[zone_id].set_schedule(json.dumps(zone_info))
         print("Restored zone schedules from: %s" % filename)

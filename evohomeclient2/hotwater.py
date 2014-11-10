@@ -1,11 +1,16 @@
 import requests
 
-class HotWater(object):
+from zone import ZoneBase
 
-    def __init__(self, data=None):
+class HotWater(ZoneBase):
 
+    def __init__(self, client, data=None):
+        super(HotWater, self).__init__()
+        self.client = client
+        self.zone_type = 'domesticHotWater'
         if data is not None:
             self.__dict__.update(data)
+            self.zoneId = self.dhwId
 
     def _set_dhw(self, data):
         headers = dict(self.client.headers)
