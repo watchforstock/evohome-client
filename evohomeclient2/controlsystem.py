@@ -70,7 +70,7 @@ class ControlSystem(EvohomeBase):
             yield {'thermostat': 'DOMESTIC_HOT_WATER',
                     'id': dhw['dhwId'],
                     'name': '',
-                    'temp': dhw['temperatureStatus']['temperature']
+                    'temp': dhw['temperatureStatus']['temperature'],
                     'setpoint': ''
                   }
 
