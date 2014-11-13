@@ -52,14 +52,16 @@ class Zone(ZoneBase):
 
     def set_temperature(self, temperature, until=None):
         if until is None:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUnitl":None}
+            data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUntil":None}
         else:
             data = {"HeatSetpointValue":temperature,"SetpointMode":2,"TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
         self.client._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
         url = 'https://rs.alarmnet.com//TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
-        response = requests.put(url, json.dumps(data), headers=self.client.headers)
+        headers = dict(self.client.headers)
+        headers['Content-Type'] = 'application/json'
+        response = requests.put(url, json.dumps(data), headers=headers)
 
     def cancel_temp_override(self, zone):
         data = {"HeatSetpointValue":0.0,"SetpointMode":0,"TimeUntil":None}
