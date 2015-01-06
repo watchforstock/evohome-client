@@ -1,4 +1,5 @@
 import json
+import requests
 
 from zone import Zone
 from hotwater import HotWater
@@ -34,7 +35,7 @@ class ControlSystem(EvohomeBase):
 
     def _set_status(self, mode, until=None):
 
-        headers = dict(self.headers)
+        headers = dict(self.client.headers)
         headers['Content-Type'] = 'application/json'
 
         if until is None:
