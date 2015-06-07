@@ -74,12 +74,15 @@ class ControlSystem(EvohomeBase):
                   }
 
         for zone in self._zones:
-            yield {'thermostat': 'EMEA_ZONE',
-                    'id': zone.zoneId,
-                    'name': zone.name,
-                    'temp': zone.temperatureStatus['temperature'],
-                    'setpoint': zone.heatSetpointStatus['targetTemperature']
-                  }
+            z = {'thermostat': 'EMEA_ZONE',
+                 'id': zone.zoneId,
+                 'name': zone.name,
+                 'temp': None,
+                 'setpoint': zone.heatSetpointStatus['targetTemperature']
+                }
+            if zone.temperatureStatus['isAvailable']:
+                z['temp'] = zone.temperatureStatus['temperature']
+            yield z
 
     def zone_schedules_backup(self, filename):
         print("Backing up zone schedule to: %s" % (filename))
