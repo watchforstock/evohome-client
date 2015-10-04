@@ -64,7 +64,9 @@ class EvohomeClient:
             yield {'thermostat': device['thermostatModelType'],
                     'id': device['deviceID'],
                     'name': device['name'],
-                    'temp': device['thermostat']['indoorTemperature']}
+                    'temp': device['thermostat']['indoorTemperature'],
+                   'setpoint':device['thermostat']['changeableValues']['heatSetpoint']['value']}
+
 
     def get_modes(self, zone):
         self._populate_full_data()
