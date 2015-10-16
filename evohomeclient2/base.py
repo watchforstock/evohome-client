@@ -29,5 +29,4 @@ class EvohomeBase(object):
             requests_log.propagate = False
     
     def _convert(self, object):
-    #    return json.loads(self.reader(object)[0])
         return json.loads(object)
