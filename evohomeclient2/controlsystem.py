@@ -1,9 +1,9 @@
 import json
 import requests
 
-from zone import Zone
-from hotwater import HotWater
-from base import EvohomeBase, EvohomeClientInvalidPostData
+from .zone import Zone
+from .hotwater import HotWater
+from .base import EvohomeBase, EvohomeClientInvalidPostData
 
 class ControlSystem(EvohomeBase):
 

@@ -1,6 +1,6 @@
 import json
 import requests
-from base import EvohomeBase, EvohomeClientInvalidPostData
+from .base import EvohomeBase, EvohomeClientInvalidPostData
 
 class ZoneBase(EvohomeBase):
     def __init__(self):
