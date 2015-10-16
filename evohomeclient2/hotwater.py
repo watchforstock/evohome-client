@@ -1,7 +1,7 @@
 import requests
 import json
 
-from zone import ZoneBase
+from .zone import ZoneBase
 
 class HotWater(ZoneBase):
 

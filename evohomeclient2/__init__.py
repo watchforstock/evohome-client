@@ -2,8 +2,8 @@ from __future__ import print_function
 import requests
 import json
 import codecs
-from location import Location
-from base import EvohomeBase
+from .location import Location
+from .base import EvohomeBase
 
 class EvohomeClient(EvohomeBase):
     def __init__(self, username, password, debug=False):
