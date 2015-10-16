@@ -1,4 +1,4 @@
-from controlsystem import ControlSystem
+from .controlsystem import ControlSystem
 
 class Gateway(object):
 

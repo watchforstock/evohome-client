@@ -1,5 +1,5 @@
-from gateway import Gateway
-from base import EvohomeBase
+from .gateway import Gateway
+from .base import EvohomeBase
 import requests
 
 class Location(EvohomeBase):
