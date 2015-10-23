@@ -3,6 +3,17 @@ import requests
 import json
 import time
 import codecs
+import sys
+
+
+# stole this from requests libary. To determine whether we are dealing
+# with Python 2 or 3
+_ver = sys.version_info
+
+#: Python 2.x?
+is_py2=(_ver[0]==2)
+#: Python 3.x?
+is_py3=(_ver[0]==3)
 
 class EvohomeClient:
     def __init__(self, username, password):
@@ -70,14 +81,16 @@ class EvohomeClient:
 
     def get_modes(self, zone):
         self._populate_full_data()
-        
-        if isinstance(zone, basestring):
+        device = self._get_device(zone)
+        return device['thermostat']['allowedModes']
+
+    def _get_device(self, zone):
+        if isinstance(zone, str) or (is_py2 and isinstance(zone, basestring)):
             device = self.named_devices[zone]
         else:
             device = self.devices[zone]
-            
-        return device['thermostat']['allowedModes']
-    
+        return device
+
     def _get_task_status(self, task_id):
         self._populate_full_data()
         url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/commTasks?commTaskId=%s' % task_id
@@ -127,10 +140,7 @@ class EvohomeClient:
         self._set_status('HeatingOff', until)
 
     def _get_device_id(self, zone):
-        if isinstance(zone, basestring):
-            device = self.named_devices[zone]
-        else:
-            device = self.devices[zone]
+        device = self._get_device(zone)
         return device['deviceID']
         
     def _set_heat_setpoint(self, zone, data):
