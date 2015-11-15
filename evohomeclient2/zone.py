@@ -55,7 +55,7 @@ class Zone(ZoneBase):
             data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUntil":None}
         else:
             data = {"HeatSetpointValue":temperature,"SetpointMode":2,"TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
-        self.client._set_heat_setpoint(data)
+        self._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
         url = 'https://rs.alarmnet.com//TotalConnectComfort/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
