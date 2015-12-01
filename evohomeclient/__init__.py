@@ -72,11 +72,14 @@ class EvohomeClient:
     def temperatures(self, force_refresh=False):
         self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
+            setPoint = 0
+            if 'heatSetpoint' in device['thermostat']['changeableValues']:
+                setPoint = float(device['thermostat']['changeableValues']["heatSetpoint"]["value"])
             yield {'thermostat': device['thermostatModelType'],
                     'id': device['deviceID'],
                     'name': device['name'],
-                    'temp': device['thermostat']['indoorTemperature'],
-                   'setpoint':device['thermostat']['changeableValues']['heatSetpoint']['value']}
+                    'temp': float(device['thermostat']['indoorTemperature']),
+                   'setpoint':setPoint}
 
 
     def get_modes(self, zone):
