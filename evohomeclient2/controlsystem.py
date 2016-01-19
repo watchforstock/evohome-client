@@ -42,7 +42,7 @@ class ControlSystem(EvohomeBase):
             data = {"SystemMode":mode,"TimeUntil":None,"Permanent":True}
         else:
             data = {"SystemMode":mode,"TimeUntil":"%sT00:00:00Z" % until.strftime('%Y-%m-%d'),"Permanent":False}
-        r = requests.put('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.systemId, data=json.dumps(data), headers=headers)
+        r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.systemId, data=json.dumps(data), headers=headers)
 
     def set_status_normal(self):
         self._set_status(0)

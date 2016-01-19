@@ -19,7 +19,7 @@ class Location(EvohomeBase):
             self.status()
 
     def status(self):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % self.locationId, headers=self.client.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % self.locationId, headers=self.client.headers)
         data = self.client._convert(r.text)
 
         # Now feed into other elements

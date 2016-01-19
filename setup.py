@@ -2,10 +2,10 @@ from setuptools import setup
 
 setup(
 	name = 'evohomeclient',
-	version = '0.2.4',
+	version = '0.2.5',
 	description = 'Python client for connecting to the Evohome webservice',
 	url = 'https://github.com/watchforstock/evohome-client/',
-	download_url = 'https://github.com/watchforstock/evohome-client/tarball/0.2.4',
+	download_url = 'https://github.com/watchforstock/evohome-client/tarball/0.2.5',
 	author = 'Andrew Stock',
 	author_email = 'evohome@andrew-stock.com',
 	license = 'Apache 2',

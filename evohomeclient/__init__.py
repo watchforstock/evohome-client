@@ -33,7 +33,7 @@ class EvohomeClient:
             userId = self.user_data['userInfo']['userID']
             sessionId = self.user_data['sessionId']
 
-            url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/locations?userId=%s&allData=True' % userId
+            url = 'https://tccna.honeywell.com/WebAPI/api/locations?userId=%s&allData=True' % userId
 
             self.headers['sessionId'] = sessionId
 
@@ -53,14 +53,14 @@ class EvohomeClient:
     def _populate_gateway_info(self):
         self._populate_full_data()
         if self.gateway_data is None:
-            url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/gateways?locationId=%s&allData=False' % self.location_id
+            url = 'https://tccna.honeywell.com/WebAPI/api/gateways?locationId=%s&allData=False' % self.location_id
             response = requests.get(url, headers = self.headers)
             
             self.gateway_data = self._convert(response.content)[0]
 
     def _populate_user_info(self):
         if self.user_data is None:
-            url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/Session'
+            url = 'https://tccna.honeywell.com/WebAPI/api/Session'
             self.postdata = {'Username':self.username,'Password':self.password,'ApplicationId':'91db1612-73fd-4500-91b2-e63b069b185c'}
             self.headers = {'content-type':'application/json'}
 
@@ -96,7 +96,7 @@ class EvohomeClient:
 
     def _get_task_status(self, task_id):
         self._populate_full_data()
-        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/commTasks?commTaskId=%s' % task_id
+        url = 'https://tccna.honeywell.com/WebAPI/api/commTasks?commTaskId=%s' % task_id
         response = requests.get(url, headers=self.headers)
         
         return self._convert(response.content)['state']
@@ -112,7 +112,7 @@ class EvohomeClient:
         
     def _set_status(self, status, until=None):
         self._populate_full_data()
-        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/evoTouchSystems?locationId=%s' % self.location_id
+        url = 'https://tccna.honeywell.com/WebAPI/api/evoTouchSystems?locationId=%s' % self.location_id
         if until is None:
             data = {"QuickAction":status,"QuickActionNextTime":None}
         else:
@@ -151,7 +151,7 @@ class EvohomeClient:
         
         device_id = self._get_device_id(zone)
         
-        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/devices/%s/thermostat/changeableValues/heatSetpoint' % device_id
+        url = 'https://tccna.honeywell.com/WebAPI/api/devices/%s/thermostat/changeableValues/heatSetpoint' % device_id
         response = requests.put(url, json.dumps(data), headers=self.headers)
 
         task_id = self._get_task_id(response)
@@ -179,7 +179,7 @@ class EvohomeClient:
         
     def _set_dhw(self, data):
         self._populate_full_data()
-        url = 'https://rs.alarmnet.com/TotalConnectComfort/WebAPI/api/devices/%s/thermostat/changeableValues' % self._get_dhw_zone()
+        url = 'https://tccna.honeywell.com/WebAPI/api/devices/%s/thermostat/changeableValues' % self._get_dhw_zone()
         
         response = requests.put(url, data=json.dumps(data), headers=self.headers)
         

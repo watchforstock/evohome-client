@@ -48,7 +48,7 @@ class EvohomeClient(EvohomeBase):
         
         
     def _login(self):
-        url = 'https://rs.alarmnet.com:443/TotalConnectComfort/Auth/OAuth/Token'
+        url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Authorization':	'Basic YjAxM2FhMjYtOTcyNC00ZGJkLTg4OTctMDQ4YjlhYWRhMjQ5OnRlc3Q=',
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
@@ -77,13 +77,13 @@ class EvohomeClient(EvohomeBase):
 
 
     def user_account(self):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/userAccount', headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers)
 
         self.account_info = self._convert(r.text)
         return self.account_info
 
     def installation(self):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers)
 
         self.installation_info = self._convert(r.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
@@ -95,11 +95,11 @@ class EvohomeClient(EvohomeBase):
 
     def full_installation(self, location=None):
         location = self._get_location(location)
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers)
         return self._convert(r.text)
 
     def gateway(self):
-        r = requests.get('https://rs.alarmnet.com:443/TotalConnectComfort/WebAPI/emea/api/v1/gateway', headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers)
         return self._convert(r.text)
 
     def set_status_normal(self):
