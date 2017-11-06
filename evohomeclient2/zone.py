@@ -52,9 +52,9 @@ class Zone(ZoneBase):
 
     def set_temperature(self, temperature, until=None):
         if until is None:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":1,"TimeUntil":None}
+            data = {"HeatSetpointValue":temperature,"SetpointMode":"PermanentOverride","TimeUntil":None}
         else:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":2,"TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"HeatSetpointValue":temperature,"SetpointMode":"TemporaryOverride","TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
         self._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
@@ -64,6 +64,6 @@ class Zone(ZoneBase):
         response = requests.put(url, json.dumps(data), headers=headers)
 
     def cancel_temp_override(self, zone):
-        data = {"HeatSetpointValue":0.0,"SetpointMode":0,"TimeUntil":None}
+        data = {"HeatSetpointValue":0.0,"SetpointMode":"FollowSchedule","TimeUntil":None}
         self._set_heat_setpoint(data)
 
