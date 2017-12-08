@@ -45,22 +45,22 @@ class ControlSystem(EvohomeBase):
         r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.systemId, data=json.dumps(data), headers=headers)
 
     def set_status_normal(self):
-        self._set_status(0)
+        self._set_status("Auto")
 
     def set_status_custom(self, until=None):
-        self._set_status(6, until)
+        self._set_status("Custom", until)
 
     def set_status_eco(self, until=None):
-        self._set_status(2, until)
+        self._set_status("AutoWithEco", until)
 
     def set_status_away(self, until=None):
-        self._set_status(3, until)
+        self._set_status("Away", until)
 
     def set_status_dayoff(self, until=None):
-        self._set_status(4, until)
+        self._set_status("DayOff", until)
 
     def set_status_heatingoff(self, until=None):
-        self._set_status(1, until)
+        self._set_status("HeatingOff", until)
 
     def temperatures(self):
         status = self.location.status()
@@ -78,7 +78,7 @@ class ControlSystem(EvohomeBase):
                  'id': zone.zoneId,
                  'name': zone.name,
                  'temp': None,
-                 'setpoint': zone.heatSetpointStatus['targetTemperature']
+                 'setpoint': zone.setpointStatus['targetHeatTemperature']
                 }
             if zone.temperatureStatus['isAvailable']:
                 z['temp'] = zone.temperatureStatus['temperature']

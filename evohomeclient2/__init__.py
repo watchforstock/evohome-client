@@ -50,7 +50,7 @@ class EvohomeClient(EvohomeBase):
     def _login(self):
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
-            'Authorization':	'Basic YjAxM2FhMjYtOTcyNC00ZGJkLTg4OTctMDQ4YjlhYWRhMjQ5OnRlc3Q=',
+            'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
 
         }
@@ -69,7 +69,6 @@ class EvohomeClient(EvohomeBase):
         self.access_token = self._convert(r.text)['access_token']
         self.headers = {
             'Authorization': 'bearer ' + self.access_token,
-            'applicationId': 'b013aa26-9724-4dbd-8897-048b9aada249',
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
         }
         self.user_account()
