@@ -63,7 +63,7 @@ class Zone(ZoneBase):
         headers['Content-Type'] = 'application/json'
         response = requests.put(url, json.dumps(data), headers=headers)
 
-    def cancel_temp_override(self, zone):
+    def cancel_temp_override(self, *args, **kwargs):
         data = {"HeatSetpointValue":0.0,"SetpointMode":"FollowSchedule","TimeUntil":None}
         self._set_heat_setpoint(data)
 
