@@ -113,7 +113,7 @@ class ControlSystem(EvohomeBase):
         with open(filename, 'r') as f:
             schedule_db = f.read()
             schedules = json.loads(schedule_db)
-            for zone_id, zone_schedule in schedules.iteritems():
+            for zone_id, zone_schedule in schedules.items():
                 
                 name = zone_schedule['name']
                 zone_info = zone_schedule['schedule']
