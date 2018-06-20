@@ -87,6 +87,7 @@ class EvohomeClient(EvohomeBase):
         self.installation_info = self._convert(r.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
+        self.locations = []
         for loc_data in self.installation_info:
             self.locations.append(Location(self, loc_data))
 
