@@ -105,6 +105,9 @@ class EvohomeClient(EvohomeBase):
     def set_status_normal(self):
         return self._get_single_heating_system().set_status_normal()
 
+    def set_status_reset(self):
+        return self._get_single_heating_system().set_status_reset()
+
     def set_status_custom(self, until=None):
         return self._get_single_heating_system().set_status_custom(until)
 

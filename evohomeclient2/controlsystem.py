@@ -47,6 +47,9 @@ class ControlSystem(EvohomeBase):
     def set_status_normal(self):
         self._set_status("Auto")
 
+    def set_status_reset(self):
+        self._set_status("AutoWithReset")
+
     def set_status_custom(self, until=None):
         self._set_status("Custom", until)
 
