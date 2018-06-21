@@ -13,9 +13,6 @@ class EvohomeClient(EvohomeBase):
         self.username = username
         self.password = password
 
-        self.access_token = None
-        self.locations = []
-
         self._login()
 
     def _get_location(self, location):
@@ -48,6 +45,9 @@ class EvohomeClient(EvohomeBase):
         return control_system
         
     def _basic_login(self):
+        self.access_token = None
+        self.locations = []
+
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
@@ -83,7 +83,7 @@ class EvohomeClient(EvohomeBase):
         self.installation()
 
     def headers(self):
-        if datetime.now() > self.access_token_expires:
+        if datetime.now() > self.access_token_expires - timedelta(seconds = 30):
             self._basic_login()
         return self._headers
 
