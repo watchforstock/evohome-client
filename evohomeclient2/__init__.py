@@ -2,6 +2,7 @@ from __future__ import print_function
 import requests
 import json
 import codecs
+from datetime import datetime, timedelta
 from .location import Location
 from .base import EvohomeBase
 
@@ -12,7 +13,6 @@ class EvohomeClient(EvohomeBase):
         self.username = username
         self.password = password
 
-        self.access_token = None
         self.locations = []
 
         self._login()
@@ -48,6 +48,9 @@ class EvohomeClient(EvohomeBase):
         
         
     def _login(self):
+        self._access_token = None
+        self.access_token_expires = None
+
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
@@ -67,6 +70,8 @@ class EvohomeClient(EvohomeBase):
         }
         r = requests.post(url, data=data, headers=headers)
         self.access_token = self._convert(r.text)['access_token']
+        self.access_token_expires = datetime.now() \
+            + timedelta(seconds = self._convert(r.text)['expires_in'])
         self.headers = {
             'Authorization': 'bearer ' + self.access_token,
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
