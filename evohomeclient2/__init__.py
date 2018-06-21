@@ -2,6 +2,7 @@ from __future__ import print_function
 import requests
 import json
 import codecs
+from datetime import datetime, timedelta
 from .location import Location
 from .base import EvohomeBase
 
@@ -46,8 +47,7 @@ class EvohomeClient(EvohomeBase):
             
         return control_system
         
-        
-    def _login(self):
+    def _basic_login(self):
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
@@ -66,23 +66,35 @@ class EvohomeClient(EvohomeBase):
             'Connection':	'Keep-Alive'
         }
         r = requests.post(url, data=data, headers=headers)
-        self.access_token = self._convert(r.text)['access_token']
-        self.headers = {
+
+        data = self._convert(r.text)
+        self.access_token = data['access_token']
+
+        self.access_token_expires = datetime.now() + timedelta(seconds = data['expires_in'])
+
+        self._headers = {
             'Authorization': 'bearer ' + self.access_token,
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
         }
+        
+    def _login(self):
+        self._basic_login()
         self.user_account()
         self.installation()
 
+    def headers(self):
+        if datetime.now() > self.access_token_expires:
+            self._basic_login()
+        return self._headers
 
     def user_account(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
 
         self.account_info = self._convert(r.text)
         return self.account_info
 
     def installation(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers())
 
         self.installation_info = self._convert(r.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
@@ -95,11 +107,11 @@ class EvohomeClient(EvohomeBase):
 
     def full_installation(self, location=None):
         location = self._get_location(location)
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers())
         return self._convert(r.text)
 
     def gateway(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers)
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
         return self._convert(r.text)
 
     def set_status_normal(self):

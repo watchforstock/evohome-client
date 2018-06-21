@@ -14,7 +14,7 @@ class HotWater(ZoneBase):
             self.zoneId = self.dhwId
 
     def _set_dhw(self, data):
-        headers = dict(self.client.headers)
+        headers = dict(self.client.headers())
         headers['Content-Type'] = 'application/json'
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/domesticHotWater/%s/state' % self.dhwId
 
