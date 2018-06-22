@@ -2,6 +2,9 @@ from .gateway import Gateway
 from .base import EvohomeBase
 import requests
 
+import logging
+_LOGGER = logging.getLogger(__name__)
+
 class Location(EvohomeBase):
 
     def __init__(self, client, data=None):
@@ -19,7 +22,14 @@ class Location(EvohomeBase):
             self.status()
 
     def status(self):
+        _LOGGER.info("status(), calling: r = requests.get(...)...")
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % self.locationId, headers=self.client.headers())
+        _LOGGER.info("status(), r.status_code: %s", r.status_code)
+        _LOGGER.info("status(): r.text = '%s'", r.text)
+
+        if r.status_code != requests.codes.ok:
+            _LOGGER.info("status(): r.text = '%s'", r.text)
+            r.raise_for_status()
         data = self.client._convert(r.text)
 
         # Now feed into other elements
