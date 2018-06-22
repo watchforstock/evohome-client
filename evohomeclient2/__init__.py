@@ -46,7 +46,7 @@ class EvohomeClient(EvohomeBase):
         
     def _basic_login(self):
         self.access_token = None
-        self.locations = []
+#       self.locations = []
 
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
