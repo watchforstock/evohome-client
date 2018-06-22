@@ -46,7 +46,7 @@ class EvohomeClient(EvohomeBase):
         
     def _basic_login(self):
         self.access_token = None
-#       self.locations = []
+        self.locations = []
 
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
@@ -66,6 +66,9 @@ class EvohomeClient(EvohomeBase):
             'Connection':	'Keep-Alive'
         }
         r = requests.post(url, data=data, headers=headers)
+
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
 
         data = self._convert(r.text)
         self.access_token = data['access_token']
@@ -90,11 +93,17 @@ class EvohomeClient(EvohomeBase):
     def user_account(self):
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
 
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
+
         self.account_info = self._convert(r.text)
         return self.account_info
 
     def installation(self):
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers())
+
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
 
         self.installation_info = self._convert(r.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
@@ -108,10 +117,18 @@ class EvohomeClient(EvohomeBase):
     def full_installation(self, location=None):
         location = self._get_location(location)
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers())
+
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
+
         return self._convert(r.text)
 
     def gateway(self):
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
+
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
+
         return self._convert(r.text)
 
     def set_status_normal(self):
