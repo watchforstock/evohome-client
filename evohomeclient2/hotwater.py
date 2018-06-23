@@ -14,12 +14,14 @@ class HotWater(ZoneBase):
             self.zoneId = self.dhwId
 
     def _set_dhw(self, data):
-        headers = dict(self.client.headers)
+        headers = dict(self.client.headers())
         headers['Content-Type'] = 'application/json'
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/domesticHotWater/%s/state' % self.dhwId
 
-        response = requests.put(url, data=json.dumps(data), headers=headers)
+        r = requests.put(url, data=json.dumps(data), headers=headers)
 
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
 
     def set_dhw_on(self, until=None):
         if until is None:

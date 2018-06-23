@@ -35,14 +35,18 @@ class ControlSystem(EvohomeBase):
 
     def _set_status(self, mode, until=None):
 
-        headers = dict(self.client.headers)
+        headers = dict(self.client.headers())
         headers['Content-Type'] = 'application/json'
 
         if until is None:
             data = {"SystemMode":mode,"TimeUntil":None,"Permanent":True}
         else:
             data = {"SystemMode":mode,"TimeUntil":"%sT00:00:00Z" % until.strftime('%Y-%m-%d'),"Permanent":False}
+
         r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.systemId, data=json.dumps(data), headers=headers)
+
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
 
     def set_status_normal(self):
         self._set_status("Auto")
