@@ -84,7 +84,11 @@ class EvohomeClient(EvohomeBase):
         self.installation()
 
     def headers(self):
-        if datetime.now() > self.access_token_expires - timedelta(seconds = 30):
+        if self.access_token is None or self.access_token_expires is None:
+        # token is invalid
+            self._basic_login()
+        elif datetime.now() > self.access_token_expires - timedelta(seconds = 30):
+        # token has expired
             self._basic_login()
         return self._headers
 
