@@ -19,12 +19,12 @@ class EvohomeBase(object):
         
         if debug:
             http_client.HTTPConnection.debuglevel = 1
-            logging.getLogger().setLevel(logging.DEBUG)
+            logging.getLogger(__name__).setLevel(logging.DEBUG)
             requests_log.setLevel(logging.DEBUG)
             requests_log.propagate = True
         else:
             http_client.HTTPConnection.debuglevel = 0
-            logging.getLogger().setLevel(logging.INFO)
+            logging.getLogger(__name__).setLevel(logging.INFO)
             requests_log.setLevel(logging.INFO)
             requests_log.propagate = False
     
