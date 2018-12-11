@@ -44,15 +44,18 @@ class EvohomeClient:
 
             self.full_data = self._convert(response.content)[0]
             
-            self.location_id = self.full_data['locationID']
+            try:
+                self.location_id = self.full_data['locationID']
             
-            self.devices = {}
-            self.named_devices = {}
+                self.devices = {}
+                self.named_devices = {}
             
-            for device in self.full_data['devices']:
-                self.devices[device['deviceID']] = device
-                self.named_devices[device['name']] = device
-                
+                for device in self.full_data['devices']:
+                    self.devices[device['deviceID']] = device
+                    self.named_devices[device['name']] = device
+            except Exception as e:
+                raise Exception('Invalid full_data: %s' % repr(self.full_data)) from e
+
     def _populate_gateway_info(self):
         self._populate_full_data()
         if self.gateway_data is None:
