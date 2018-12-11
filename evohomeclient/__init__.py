@@ -30,8 +30,11 @@ class EvohomeClient:
     def _populate_full_data(self, force_refresh=False):
         if self.full_data is None or force_refresh:
             self._populate_user_info()
-            userId = self.user_data['userInfo']['userID']
-            sessionId = self.user_data['sessionId']
+            try:
+                userId = self.user_data['userInfo']['userID']
+                sessionId = self.user_data['sessionId']
+            except Exception as e:
+                raise Exception('Invalid user_data: %s' % repr(self.user_data)) from e
 
             url = 'https://tccna.honeywell.com/WebAPI/api/locations?userId=%s&allData=True' % userId
 
