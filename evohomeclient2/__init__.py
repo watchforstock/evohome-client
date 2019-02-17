@@ -72,6 +72,7 @@ class EvohomeClient(EvohomeBase):
         data = self._convert(r.text)
         self.access_token = data['access_token']
         self.access_token_expires = datetime.now() + timedelta(seconds = data['expires_in'])
+        self.refresh_token =  data['refresh_token']
 
         self._headers = {
             'Authorization': 'bearer ' + self.access_token,
