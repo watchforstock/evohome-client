@@ -7,11 +7,21 @@ from .location import Location
 from .base import EvohomeBase
 
 class EvohomeClient(EvohomeBase):
-    def __init__(self, username, password, debug=False):
+    def __init__(self, username, password, debug=False, access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
         self.username = username
         self.password = password
+
+        self.access_token = access_token
+        self.access_token_expires = access_token_expires
+
+        # If previous details are provided, we also need to initialise the _headers object
+        if self.access_token is not None:
+            self._headers = {
+                'Authorization': 'bearer ' + self.access_token,
+                'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+            }
 
         self._login()
 
@@ -80,7 +90,6 @@ class EvohomeClient(EvohomeBase):
         }
         
     def _login(self):
-        self._basic_login()
         self.user_account()
         self.installation()
 
