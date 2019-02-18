@@ -90,11 +90,13 @@ class EvohomeClient(EvohomeBase):
             self._basic_login()
         else:
         # token is valid (but is it correct?)
-            self._headers = {
+            pass
+
+        return \
+            {
                 'Authorization': 'bearer ' + self.access_token,
                 'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
             }
-        return self._headers
 
     def user_account(self):
         self.account_info = None
