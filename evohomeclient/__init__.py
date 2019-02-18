@@ -4,6 +4,15 @@ import json
 import time
 import codecs
 import sys
+import logging
+logging.basicConfig()
+requests_log = logging.getLogger("requests.packages.urllib3")
+
+try:
+    import http.client as http_client
+except ImportError:
+    # Python 2
+    import httplib as http_client
 
 
 # stole this from requests libary. To determine whether we are dealing
@@ -16,13 +25,24 @@ is_py2=(_ver[0]==2)
 is_py3=(_ver[0]==3)
 
 class EvohomeClient:
-    def __init__(self, username, password):
+    def __init__(self, username, password, debug = False, user_data = None):
         self.username = username
         self.password = password
-        self.user_data = None
+        self.user_data = user_data
         self.full_data = None
         self.gateway_data = None
         self.reader = codecs.getdecoder("utf-8")
+
+        if debug:
+            http_client.HTTPConnection.debuglevel = 1
+            logging.getLogger(__name__).setLevel(logging.DEBUG)
+            requests_log.setLevel(logging.DEBUG)
+            requests_log.propagate = True
+        else:
+            http_client.HTTPConnection.debuglevel = 0
+            logging.getLogger(__name__).setLevel(logging.INFO)
+            requests_log.setLevel(logging.INFO)
+            requests_log.propagate = False
     
     def _convert(self, object):
         return json.loads(self.reader(object)[0])
