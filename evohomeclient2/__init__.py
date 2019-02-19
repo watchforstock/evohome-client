@@ -69,7 +69,9 @@ class EvohomeClient(EvohomeBase):
         }
         r = requests.post(url, data=data, headers=headers)
 
-        if r.status_code != requests.codes.ok:
+#       if r.status_code != requests.codes.too_many_requests:
+#           exceeded API rate limit for url: https://tccna.honeywell.com/Auth/OAuth/Token
+        elif r.status_code != requests.codes.ok:
             r.raise_for_status()
 
         data = self._convert(r.text)
@@ -85,9 +87,9 @@ class EvohomeClient(EvohomeBase):
         if self.access_token is None or self.access_token_expires is None:
         # token is invalid
             self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds = 30):
+#       elif datetime.now() > self.access_token_expires - timedelta(seconds = 30):
         # token has expired
-            self._basic_login()
+#           self._basic_login()
         else:
         # token is valid (but is it correct?)
             pass
@@ -102,6 +104,8 @@ class EvohomeClient(EvohomeBase):
         self.account_info = None
         r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
 
+#       if r.status_code != requests.codes.unauthorized:
+#           Invalid token for url: https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount
         if r.status_code != requests.codes.ok:
             r.raise_for_status()
 
