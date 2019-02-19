@@ -7,11 +7,14 @@ from .location import Location
 from .base import EvohomeBase
 
 class EvohomeClient(EvohomeBase):
-    def __init__(self, username, password, debug=False):
+    def __init__(self, username, password, debug=False, access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
         self.username = username
         self.password = password
+
+        self.access_token = access_token
+        self.access_token_expires = access_token_expires
 
         self._login()
 
@@ -72,15 +75,8 @@ class EvohomeClient(EvohomeBase):
         data = self._convert(r.text)
         self.access_token = data['access_token']
         self.access_token_expires = datetime.now() + timedelta(seconds = data['expires_in'])
-        self.refresh_token =  data['refresh_token']
 
-        self._headers = {
-            'Authorization': 'bearer ' + self.access_token,
-            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
-        }
-        
     def _login(self):
-        self._basic_login()
         self.user_account()
         self.installation()
 
@@ -91,6 +87,12 @@ class EvohomeClient(EvohomeBase):
         elif datetime.now() > self.access_token_expires - timedelta(seconds = 30):
         # token has expired
             self._basic_login()
+        
+        self._headers = {
+            'Authorization': 'bearer ' + self.access_token,
+            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+        }
+
         return self._headers
 
     def user_account(self):
