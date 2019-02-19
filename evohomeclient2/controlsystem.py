@@ -5,6 +5,7 @@ from .zone import Zone
 from .hotwater import HotWater
 from .base import EvohomeBase, EvohomeClientInvalidPostData
 
+
 class ControlSystem(EvohomeBase):
 
     def __init__(self, client, location, gateway, data=None):
@@ -39,9 +40,9 @@ class ControlSystem(EvohomeBase):
         headers['Content-Type'] = 'application/json'
 
         if until is None:
-            data = {"SystemMode":mode,"TimeUntil":None,"Permanent":True}
+            data = {"SystemMode": mode, "TimeUntil": None, "Permanent": True}
         else:
-            data = {"SystemMode":mode,"TimeUntil":"%sT00:00:00Z" % until.strftime('%Y-%m-%d'),"Permanent":False}
+            data = {"SystemMode": mode, "TimeUntil": "%sT00:00:00Z" % until.strftime('%Y-%m-%d'), "Permanent": False}
 
         r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' % self.systemId, data=json.dumps(data), headers=headers)
 
@@ -74,19 +75,17 @@ class ControlSystem(EvohomeBase):
 
         if self.hotwater:
             yield {'thermostat': 'DOMESTIC_HOT_WATER',
-                    'id': self.hotwater.dhwId,
-                    'name': '',
-                    'temp': self.hotwater.temperatureStatus['temperature'],
-                    'setpoint': ''
-                  }
+                   'id': self.hotwater.dhwId,
+                   'name': '',
+                   'temp': self.hotwater.temperatureStatus['temperature'],
+                   'setpoint': ''}
 
         for zone in self._zones:
             z = {'thermostat': 'EMEA_ZONE',
                  'id': zone.zoneId,
                  'name': zone.name,
                  'temp': None,
-                 'setpoint': zone.setpointStatus['targetHeatTemperature']
-                }
+                 'setpoint': zone.setpointStatus['targetHeatTemperature']}
             if zone.temperatureStatus['isAvailable']:
                 z['temp'] = zone.temperatureStatus['temperature']
             yield z
@@ -95,19 +94,19 @@ class ControlSystem(EvohomeBase):
         print("Backing up zone schedule to: %s" % (filename))
 
         schedules = {}
-        
+
         if self.hotwater:
             print("Retrieving DHW schedule: %s" % self.hotwater.zoneId)
             s = self.hotwater.schedule()
             schedules[self.hotwater.zoneId] = {'name': 'Domestic Hot Water', 'schedule': s}
-        
+
         for z in self._zones:
             zone_id = z.zoneId
             name = z.name
             print("Retrieving zone schedule: %s - %s" % (zone_id, name))
             s = z.schedule()
             schedules[zone_id] = {'name': name, 'schedule': s}
-            
+
         schedule_db = json.dumps(schedules, indent=4)
 
         with open(filename, 'w') as f:
@@ -121,12 +120,12 @@ class ControlSystem(EvohomeBase):
             schedule_db = f.read()
             schedules = json.loads(schedule_db)
             for zone_id, zone_schedule in schedules.items():
-                
+
                 name = zone_schedule['name']
                 zone_info = zone_schedule['schedule']
                 print("Restoring schedule for: %s - %s" % (zone_id, name))
-                
-                if self.hotwater and self.hotwater.zoneId==zone_id:
+
+                if self.hotwater and self.hotwater.zoneId == zone_id:
                     self.hotwater.set_schedule(json.dumps(zone_info))
                 else:
                     self.zones_by_id[zone_id].set_schedule(json.dumps(zone_info))

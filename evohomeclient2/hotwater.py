@@ -3,6 +3,7 @@ import json
 
 from .zone import ZoneBase
 
+
 class HotWater(ZoneBase):
 
     def __init__(self, client, data=None):
@@ -25,18 +26,18 @@ class HotWater(ZoneBase):
 
     def set_dhw_on(self, until=None):
         if until is None:
-            data = {"State":"On","Mode":"PermanentOverride","UntilTime":None}
+            data = {"State": "On", "Mode": "PermanentOverride", "UntilTime": None}
         else:
-            data = {"State":"On","Mode":"TemporaryOverride","UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"State": "On", "Mode": "TemporaryOverride", "UntilTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
         self._set_dhw(data)
 
     def set_dhw_off(self, until=None):
         if until is None:
-            data = {"State":"Off","Mode":"PermanentOverride","UntilTime":None}
+            data = {"State": "Off", "Mode": "PermanentOverride", "UntilTime": None}
         else:
-            data = {"State":"Off","Mode":"TemporaryOverride","UntilTime":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"State": "Off", "Mode": "TemporaryOverride", "UntilTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
         self._set_dhw(data)
 
     def set_dhw_auto(self):
-        data =  {"State":"","Mode":"FollowSchedule","UntilTime":None}
+        data = {"State": "", "Mode": "FollowSchedule", "UntilTime": None}
         self._set_dhw(data)

@@ -1,7 +1,7 @@
 from .controlsystem import ControlSystem
 
-class Gateway(object):
 
+class Gateway(object):
 
     def __init__(self, client, location, data=None):
         self.client = client

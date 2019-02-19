@@ -2,6 +2,7 @@ import json
 import requests
 from .base import EvohomeBase, EvohomeClientInvalidPostData
 
+
 class ZoneBase(EvohomeBase):
     def __init__(self):
         super(ZoneBase, self).__init__()
@@ -23,13 +24,13 @@ class ZoneBase(EvohomeBase):
         j = r.text
         for f, t in mapping:
             j = j.replace(f, t)
-            
+
         d = self._convert(j)
         # change the day name string to a number offset (0 = Monday)
         for day_of_week, schedule in enumerate(d['DailySchedules']):
             schedule['DayOfWeek'] = day_of_week
         return d
-        
+
     def set_schedule(self, zone_info):
         # must only POST json, otherwise server API handler raises exceptions
 
@@ -47,6 +48,7 @@ class ZoneBase(EvohomeBase):
 
         return self._convert(r.text)
 
+
 class Zone(ZoneBase):
 
     def __init__(self, client, data=None):
@@ -58,9 +60,9 @@ class Zone(ZoneBase):
 
     def set_temperature(self, temperature, until=None):
         if until is None:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":"PermanentOverride","TimeUntil":None}
+            data = {"HeatSetpointValue": temperature, "SetpointMode": "PermanentOverride", "TimeUntil": None}
         else:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":"TemporaryOverride","TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"HeatSetpointValue": temperature, "SetpointMode": "TemporaryOverride", "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
         self._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
@@ -73,6 +75,5 @@ class Zone(ZoneBase):
             r.raise_for_status()
 
     def cancel_temp_override(self, *args, **kwargs):
-        data = {"HeatSetpointValue":0.0,"SetpointMode":"FollowSchedule","TimeUntil":None}
+        data = {"HeatSetpointValue": 0.0, "SetpointMode": "FollowSchedule", "TimeUntil": None}
         self._set_heat_setpoint(data)
-
