@@ -37,7 +37,7 @@ class ZoneBase(EvohomeBase):
         try:
             json.loads(zone_info)
         except ValueError as error:
-            raise EvohomeClientInvalidPostData('zone_info must be valid JSON')
+            raise EvohomeClientInvalidPostData('zone_info must be valid JSON: ', error)
 
         headers = dict(self.client.headers())
         headers['Content-Type'] = 'application/json'

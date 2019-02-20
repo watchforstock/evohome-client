@@ -1,7 +1,5 @@
 from __future__ import print_function
 import requests
-# import json
-# import codecs
 from datetime import datetime, timedelta
 from .location import Location
 from .base import EvohomeBase
