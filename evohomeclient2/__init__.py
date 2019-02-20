@@ -74,6 +74,7 @@ class EvohomeClient(EvohomeBase):
             r.raise_for_status()
 
         data = self._convert(r.text)
+
         self.refresh_token = data['refresh_token']
         self.access_token = data['access_token']
         self.access_token_expires = datetime.now() + timedelta(seconds=data['expires_in'])
