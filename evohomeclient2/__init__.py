@@ -1,7 +1,7 @@
 from __future__ import print_function
 import requests
-import json
-import codecs
+# import json
+# import codecs
 from datetime import datetime, timedelta
 from .location import Location
 from .base import EvohomeBase
@@ -74,6 +74,7 @@ class EvohomeClient(EvohomeBase):
             r.raise_for_status()
 
         data = self._convert(r.text)
+        self.refresh_token = data['refresh_token']
         self.access_token = data['access_token']
         self.access_token_expires = datetime.now() + timedelta(seconds=data['expires_in'])
 

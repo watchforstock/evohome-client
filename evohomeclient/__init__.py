@@ -114,7 +114,7 @@ class EvohomeClient:
         return device['thermostat']['allowedModes']
 
     def _get_device(self, zone):
-        if isinstance(zone, str) or (is_py2 and isinstance(zone, basestring)):
+        if isinstance(zone, str) or (is_py2 and isinstance(zone, basestring)):   # noqa: F821, E501
             device = self.named_devices[zone]
         else:
             device = self.devices[zone]
