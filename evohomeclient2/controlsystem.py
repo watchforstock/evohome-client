@@ -3,7 +3,7 @@ import requests
 
 from .zone import Zone
 from .hotwater import HotWater
-from .base import EvohomeBase, EvohomeClientInvalidPostData
+from .base import EvohomeBase
 
 
 class ControlSystem(EvohomeBase):
@@ -71,8 +71,6 @@ class ControlSystem(EvohomeBase):
         self._set_status("HeatingOff", until)
 
     def temperatures(self):
-        status = self.location.status()
-
         if self.hotwater:
             yield {'thermostat': 'DOMESTIC_HOT_WATER',
                    'id': self.hotwater.dhwId,
