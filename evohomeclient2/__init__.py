@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from .location import Location
 from .base import EvohomeBase
 
+
 class EvohomeClient(EvohomeBase):
     def __init__(self, username, password, debug=False, access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
@@ -29,43 +30,43 @@ class EvohomeClient(EvohomeBase):
         location = None
         gateway = None
         control_system = None
-        
-        if len(self.locations)==1:
+
+        if len(self.locations) == 1:
             location = self.locations[0]
         else:
             raise Exception("More than one location available")
-            
-        if len(location._gateways)==1:
+
+        if len(location._gateways) == 1:
             gateway = location._gateways[0]
         else:
             raise Exception("More than one gateway available")
-            
-        if len(gateway._control_systems)==1:
+
+        if len(gateway._control_systems) == 1:
             control_system = gateway._control_systems[0]
         else:
             raise Exception("More than one control system available")
-            
+
         return control_system
-        
+
     def _basic_login(self):
         self.access_token = None
         self.access_token_expires = None
 
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
-            'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
+            'Authorization': 'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
         }
         data = {
-            'Content-Type':	'application/x-www-form-urlencoded; charset=utf-8',
-            'Host':	'rs.alarmnet.com/',
-            'Cache-Control':'no-store no-cache',
-            'Pragma':	'no-cache',
-            'grant_type':	'password',
-            'scope':	'EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account',
-            'Username':	self.username,
-            'Password':	self.password,
-            'Connection':	'Keep-Alive'
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            'Host': 'rs.alarmnet.com/',
+            'Cache-Control': 'no-store no-cache',
+            'Pragma': 'no-cache',
+            'grant_type': 'password',
+            'scope': 'EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account',
+            'Username': self.username,
+            'Password': self.password,
+            'Connection': 'Keep-Alive'
         }
         r = requests.post(url, data=data, headers=headers)
 
@@ -74,20 +75,20 @@ class EvohomeClient(EvohomeBase):
 
         data = self._convert(r.text)
         self.access_token = data['access_token']
-        self.access_token_expires = datetime.now() + timedelta(seconds = data['expires_in'])
-        
+        self.access_token_expires = datetime.now() + timedelta(seconds=data['expires_in'])
+
     def _login(self):
         self.user_account()
         self.installation()
 
     def headers(self):
         if self.access_token is None or self.access_token_expires is None:
-        # token is invalid
+            # token is invalid
             self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds = 30):
-        # token has expired
+        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
+            # token has expired
             self._basic_login()
-        
+
         self._headers = {
             'Authorization': 'bearer ' + self.access_token,
             'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
@@ -160,7 +161,7 @@ class EvohomeClient(EvohomeBase):
 
     def temperatures(self):
         return self._get_single_heating_system().temperatures()
-    
+
     def zone_schedules_backup(self, filename):
         return self._get_single_heating_system().zone_schedules_backup(filename)
 

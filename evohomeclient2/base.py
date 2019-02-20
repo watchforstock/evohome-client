@@ -10,13 +10,15 @@ except ImportError:
     # Python 2
     import httplib as http_client
 
+
 class EvohomeClientInvalidPostData(Exception):
     pass
+
 
 class EvohomeBase(object):
     def __init__(self, debug=False):
         self.reader = codecs.getdecoder("utf-8")
-        
+
         if debug:
             http_client.HTTPConnection.debuglevel = 1
             logging.getLogger(__name__).setLevel(logging.DEBUG)
@@ -27,6 +29,6 @@ class EvohomeBase(object):
             logging.getLogger(__name__).setLevel(logging.INFO)
             requests_log.setLevel(logging.INFO)
             requests_log.propagate = False
-    
+
     def _convert(self, object):
         return json.loads(object)

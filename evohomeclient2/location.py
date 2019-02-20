@@ -2,6 +2,7 @@ from .gateway import Gateway
 from .base import EvohomeBase
 import requests
 
+
 class Location(EvohomeBase):
 
     def __init__(self, client, data=None):
