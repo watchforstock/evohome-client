@@ -1,12 +1,14 @@
 from __future__ import print_function
-import requests
-import json
-import time
+
 import codecs
-import sys
+import json
 import logging
+import time
+import sys
+import requests
+
 logging.basicConfig()
-requests_log = logging.getLogger("requests.packages.urllib3")
+REQUESTS_LOG = logging.getLogger("requests.packages.urllib3")
 
 try:
     import http.client as http_client
@@ -15,17 +17,17 @@ except ImportError:
     import httplib as http_client
 
 
-# stole this from requests libary. To determine whether we are dealing
+# stole this from requests library. To determine whether we are dealing
 # with Python 2 or 3
-_ver = sys.version_info
-
+_VER = sys.version_info
 #: Python 2.x?
-is_py2 = (_ver[0] == 2)
+IS_PY2 = (_VER[0] == 2)
 #: Python 3.x?
-is_py3 = (_ver[0] == 3)
+IS_PY3 = (_VER[0] == 3)
 
 
 class EvohomeClient:
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, username, password, debug=False, user_data=None):
         self.username = username
         self.password = password
@@ -34,32 +36,38 @@ class EvohomeClient:
         self.gateway_data = None
         self.reader = codecs.getdecoder("utf-8")
 
-        if debug:
+        self.location_id = None
+        self.devices = None
+        self.named_devices = None
+        self.postdata = None
+        self.headers = None
+
+        if debug is True:
             http_client.HTTPConnection.debuglevel = 1
             logging.getLogger(__name__).setLevel(logging.DEBUG)
-            requests_log.setLevel(logging.DEBUG)
-            requests_log.propagate = True
+            REQUESTS_LOG.setLevel(logging.DEBUG)
+            REQUESTS_LOG.propagate = True
         else:
             http_client.HTTPConnection.debuglevel = 0
             logging.getLogger(__name__).setLevel(logging.INFO)
-            requests_log.setLevel(logging.INFO)
-            requests_log.propagate = False
+            REQUESTS_LOG.setLevel(logging.INFO)
+            REQUESTS_LOG.propagate = False
 
-    def _convert(self, object):
-        return json.loads(self.reader(object)[0])
+    def _convert(self, content):
+        return json.loads(self.reader(content)[0])
 
     def _populate_full_data(self, force_refresh=False):
         if self.full_data is None or force_refresh:
             self._populate_user_info()
             try:
-                userId = self.user_data['userInfo']['userID']
-                sessionId = self.user_data['sessionId']
-            except Exception as e:
-                raise Exception('Invalid user_data: %s' % repr(self.user_data)) from e
+                user_id = self.user_data['userInfo']['userID']
+                session_id = self.user_data['sessionId']
+            except Exception as error:
+                raise Exception('Invalid user_data: %s' % repr(self.user_data)) from error
 
-            url = 'https://tccna.honeywell.com/WebAPI/api/locations?userId=%s&allData=True' % userId
+            url = 'https://tccna.honeywell.com/WebAPI/api/locations?userId=%s&allData=True' % user_id
 
-            self.headers['sessionId'] = sessionId
+            self.headers['sessionId'] = session_id
 
             response = requests.get(url, data=json.dumps(self.postdata), headers=self.headers)
 
@@ -74,8 +82,8 @@ class EvohomeClient:
                 for device in self.full_data['devices']:
                     self.devices[device['deviceID']] = device
                     self.named_devices[device['name']] = device
-            except Exception as e:
-                raise Exception('Invalid full_data: %s' % repr(self.full_data)) from e
+            except Exception as error:
+                raise Exception('Invalid full_data: %s' % repr(self.full_data)) from error
 
     def _populate_gateway_info(self):
         self._populate_full_data()
@@ -88,10 +96,16 @@ class EvohomeClient:
     def _populate_user_info(self):
         if self.user_data is None:
             url = 'https://tccna.honeywell.com/WebAPI/api/Session'
-            self.postdata = {'Username': self.username, 'Password': self.password, 'ApplicationId': '91db1612-73fd-4500-91b2-e63b069b185c'}
+            self.postdata = {'Username': self.username,
+                             'Password': self.password,
+                             'ApplicationId': '91db1612-73fd-4500-91b2-e63b069b185c'}
+
             self.headers = {'content-type': 'application/json'}
 
-            response = requests.post(url, data=json.dumps(self.postdata), headers=self.headers)
+            response = requests.post(url,
+                                     data=json.dumps(self.postdata),
+                                     headers=self.headers)
+
             self.user_data = self._convert(response.content)
 
         return self.user_data
@@ -99,14 +113,14 @@ class EvohomeClient:
     def temperatures(self, force_refresh=False):
         self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
-            setPoint = 0
+            set_point = 0
             if 'heatSetpoint' in device['thermostat']['changeableValues']:
-                setPoint = float(device['thermostat']['changeableValues']["heatSetpoint"]["value"])
+                set_point = float(device['thermostat']['changeableValues']["heatSetpoint"]["value"])
             yield {'thermostat': device['thermostatModelType'],
                    'id': device['deviceID'],
                    'name': device['name'],
                    'temp': float(device['thermostat']['indoorTemperature']),
-                   'setpoint': setPoint}
+                   'setpoint': set_point}
 
     def get_modes(self, zone):
         self._populate_full_data()
@@ -114,7 +128,7 @@ class EvohomeClient:
         return device['thermostat']['allowedModes']
 
     def _get_device(self, zone):
-        if isinstance(zone, str) or (is_py2 and isinstance(zone, basestring)):   # noqa: F821, E501
+        if isinstance(zone, str) or (IS_PY2 and isinstance(zone, basestring)):   # noqa: F821, E501; pylint: disable=undefined-variable
             device = self.named_devices[zone]
         else:
             device = self.devices[zone]
@@ -143,7 +157,9 @@ class EvohomeClient:
             data = {"QuickAction": status, "QuickActionNextTime": None}
         else:
             data = {"QuickAction": status, "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')}
-        response = requests.put(url, data=json.dumps(data), headers=self.headers)
+        response = requests.put(url,
+                                data=json.dumps(data),
+                                headers=self.headers)
 
         task_id = self._get_task_id(response)
 
@@ -189,7 +205,10 @@ class EvohomeClient:
         if until is None:
             data = {"Value": temperature, "Status": "Hold", "NextTime": None}
         else:
-            data = {"Value": temperature, "Status": "Temporary", "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"Value": temperature,
+                    "Status": "Temporary",
+                    "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+
         self._set_heat_setpoint(zone, data)
 
     def cancel_temp_override(self, zone):
@@ -215,18 +234,48 @@ class EvohomeClient:
 
     def set_dhw_on(self, until=None):
         if until is None:
-            data = {"Mode": "DHWOn", "SpecialModes": None, "HeatSetpoint": None, "CoolSetpoint": None, "Status": "Hold", "NextTime": None}
+            data = {"Mode": "DHWOn",
+                    "SpecialModes": None,
+                    "HeatSetpoint": None,
+                    "CoolSetpoint": None,
+                    "Status": "Hold",
+                    "NextTime": None}
+
         else:
-            data = {"Mode": "DHWOn", "SpecialModes": None, "HeatSetpoint": None, "CoolSetpoint": None, "Status": "Hold", "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"Mode": "DHWOn",
+                    "SpecialModes": None,
+                    "HeatSetpoint": None,
+                    "CoolSetpoint": None,
+                    "Status": "Hold",
+                    "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+
         self._set_dhw(data)
 
     def set_dhw_off(self, until=None):
         if until is None:
-            data = {"Mode": "DHWOff", "SpecialModes": None, "HeatSetpoint": None, "CoolSetpoint": None, "Status": "Hold", "NextTime": None}
+            data = {"Mode": "DHWOff",
+                    "SpecialModes": None,
+                    "HeatSetpoint": None,
+                    "CoolSetpoint": None,
+                    "Status": "Hold",
+                    "NextTime": None}
+
         else:
-            data = {"Mode": "DHWOff", "SpecialModes": None, "HeatSetpoint": None, "CoolSetpoint": None, "Status": "Hold", "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"Mode": "DHWOff",
+                    "SpecialModes": None,
+                    "HeatSetpoint": None,
+                    "CoolSetpoint": None,
+                    "Status": "Hold",
+                    "NextTime": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+
         self._set_dhw(data)
 
     def set_dhw_auto(self):
-        data = {"Mode": None, "SpecialModes": None, "HeatSetpoint": None, "CoolSetpoint": None, "Status": "Scheduled", "NextTime": None}
+        data = {"Mode": None,
+                "SpecialModes": None,
+                "HeatSetpoint": None,
+                "CoolSetpoint": None,
+                "Status": "Scheduled",
+                "NextTime": None}
+
         self._set_dhw(data)
