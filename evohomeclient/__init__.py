@@ -225,7 +225,9 @@ class EvohomeClient:
         self._populate_full_data()
         url = 'https://tccna.honeywell.com/WebAPI/api/devices/%s/thermostat/changeableValues' % self._get_dhw_zone()
 
-        response = requests.put(url, data=json.dumps(data), headers=self.headers)
+        response = requests.put(url,
+                                data=json.dumps(data),
+                                headers=self.headers)
 
         task_id = self._get_task_id(response)
 
