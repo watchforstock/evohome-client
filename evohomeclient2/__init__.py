@@ -55,12 +55,16 @@ class EvohomeClient(EvohomeBase):
         First, try using the refresh_token, if one is provided, otherwise
         authenticate using the user credentials."""
 
+        self.access_token = None
+        self.access_token_expires = None
+
         if self.refresh_token is not None:
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
-            self._obtain_access_token(credentials)  # may: refresh_token = None
+            if not self._obtain_access_token(credentials):
+                self.refresh_token = None
 
         if self.refresh_token is None:
             credentials = {'grant_type': "password",
@@ -71,9 +75,7 @@ class EvohomeClient(EvohomeBase):
             self._obtain_access_token(credentials)
 
     def _obtain_access_token(self, credentials):
-        self.access_token = None
-        self.access_token_expires = None
-
+        """Get an access token using the supplied credentials."""
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Accept': HEADER_ACCEPT,
@@ -101,7 +103,6 @@ class EvohomeClient(EvohomeBase):
                 self.refresh_token = tokens['refresh_token']
 
         except KeyError:
-            self.refresh_token = None
             return False
 
         return True
