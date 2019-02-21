@@ -40,6 +40,8 @@ class EvohomeClient(EvohomeBase):
         self.installation()
 
     def _headers(self):
+        """Ensure the Authorization Header has a valid Access Token."""
+
         if self.access_token is None or self.access_token_expires is None:
             self._basic_login()
 
@@ -76,6 +78,7 @@ class EvohomeClient(EvohomeBase):
 
     def _obtain_access_token(self, credentials):
         """Get an access token using the supplied credentials."""
+
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         headers = {
             'Accept': HEADER_ACCEPT,
