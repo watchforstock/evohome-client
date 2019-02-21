@@ -1,12 +1,14 @@
 from __future__ import print_function
-import requests
 from datetime import datetime, timedelta
+import requests
+
 from .location import Location
 from .base import EvohomeBase
 
 
 class EvohomeClient(EvohomeBase):
-    def __init__(self, username, password, debug=False, access_token=None, access_token_expires=None):
+    def __init__(self, username, password, debug=False, access_token=None,
+                 access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
         self.username = username
@@ -14,14 +16,20 @@ class EvohomeClient(EvohomeBase):
 
         self.access_token = access_token
         self.access_token_expires = access_token_expires
+        self.refresh_token = None
+
+        self.account_info = None
+        self.system_id = None
+        self.locations = None
+        self.installation_info = None
+        self._headers = None
 
         self._login()
 
     def _get_location(self, location):
         if location is None:
             return self.installation_info[0]['locationInfo']['locationId']
-        else:
-            return location
+        return location
 
     def _get_single_heating_system(self):
         # This allows a shortcut for some systems
@@ -34,13 +42,13 @@ class EvohomeClient(EvohomeBase):
         else:
             raise Exception("More than one location available")
 
-        if len(location._gateways) == 1:
-            gateway = location._gateways[0]
+        if len(location._gateways) == 1:                                        # pylint: disable=protected-access
+            gateway = location._gateways[0]                                     # pylint: disable=protected-access
         else:
             raise Exception("More than one gateway available")
 
-        if len(gateway._control_systems) == 1:
-            control_system = gateway._control_systems[0]
+        if len(gateway._control_systems) == 1:                                  # pylint: disable=protected-access
+            control_system = gateway._control_systems[0]                        # pylint: disable=protected-access
         else:
             raise Exception("More than one control system available")
 
@@ -66,12 +74,12 @@ class EvohomeClient(EvohomeBase):
             'Password': self.password,
             'Connection': 'Keep-Alive'
         }
-        r = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, data=data, headers=headers)
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        if response.status_code != requests.codes.ok:                           # pylint: disable=no-member
+            response.raise_for_status()
 
-        data = self._convert(r.text)
+        data = self._convert(response.text)
 
         self.refresh_token = data['refresh_token']
         self.access_token = data['access_token']
@@ -98,22 +106,22 @@ class EvohomeClient(EvohomeBase):
 
     def user_account(self):
         self.account_info = None
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
+        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        if response.status_code != requests.codes.ok:                           # pylint: disable=no-member
+            response.raise_for_status()
 
-        self.account_info = self._convert(r.text)
+        self.account_info = self._convert(response.text)
         return self.account_info
 
     def installation(self):
         self.locations = []
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers())
+        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' % self.account_info['userId'], headers=self.headers())
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        if response.status_code != requests.codes.ok:                           # pylint: disable=no-member
+            response.raise_for_status()
 
-        self.installation_info = self._convert(r.text)
+        self.installation_info = self._convert(response.text)
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
         for loc_data in self.installation_info:
@@ -123,20 +131,20 @@ class EvohomeClient(EvohomeBase):
 
     def full_installation(self, location=None):
         location = self._get_location(location)
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers())
+        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' % location, headers=self.headers())
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        if response.status_code != requests.codes.ok:                           # pylint: disable=no-member
+            response.raise_for_status()
 
-        return self._convert(r.text)
+        return self._convert(response.text)
 
     def gateway(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
+        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        if response.status_code != requests.codes.ok:                           # pylint: disable=no-member
+            response.raise_for_status()
 
-        return self._convert(r.text)
+        return self._convert(response.text)
 
     def set_status_normal(self):
         return self._get_single_heating_system().set_status_normal()
