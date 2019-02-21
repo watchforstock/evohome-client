@@ -8,8 +8,9 @@ from .base import EvohomeBase
 HEADER_ACCEPT = ("application/json, application/xml, text/json, text/x-json, "
                  "text/javascript, text/xml")
 HEADER_AUTHORIZATION_BASIC = (
-    "Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGU"
-    "tNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg=="
+    "Basic "
+    "NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Y"
+    "i1hZGQwLTA1OWY5MmM1MzBjYg=="
 )
 
 
