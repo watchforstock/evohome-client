@@ -17,8 +17,8 @@ HEADER_AUTHORIZATION_BASIC = (
 
 
 class EvohomeClient(EvohomeBase):
-    def __init__(self, username, password, debug=False, access_token=None,
-                 access_token_expires=None):
+    def __init__(self, username, password, debug=False, refresh_token=None,
+                 access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
         self.username = username
@@ -26,7 +26,7 @@ class EvohomeClient(EvohomeBase):
 
         self.access_token = access_token
         self.access_token_expires = access_token_expires
-        self.refresh_token = None
+        self.refresh_token = refresh_token
 
         self.account_info = None
         self.system_id = None
