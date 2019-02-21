@@ -8,7 +8,7 @@ class ZoneBase(EvohomeBase):
         super(ZoneBase, self).__init__()
 
     def schedule(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), headers=self.client.headers())
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), headers=self.client._headers())
 
         if r.status_code != requests.codes.ok:
             r.raise_for_status()
@@ -39,7 +39,7 @@ class ZoneBase(EvohomeBase):
         except ValueError as error:
             raise EvohomeClientInvalidPostData('zone_info must be valid JSON: ', error)
 
-        headers = dict(self.client.headers())
+        headers = dict(self.client._headers())
         headers['Content-Type'] = 'application/json'
         r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), data=zone_info, headers=headers)
 
@@ -67,7 +67,7 @@ class Zone(ZoneBase):
 
     def _set_heat_setpoint(self, data):
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
-        headers = dict(self.client.headers())
+        headers = dict(self.client._headers())
         headers['Content-Type'] = 'application/json'
         r = requests.put(url, json.dumps(data), headers=headers)
 

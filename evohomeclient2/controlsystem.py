@@ -36,7 +36,7 @@ class ControlSystem(EvohomeBase):
 
     def _set_status(self, mode, until=None):
 
-        headers = dict(self.client.headers())
+        headers = dict(self.client._headers())
         headers['Content-Type'] = 'application/json'
 
         if until is None:

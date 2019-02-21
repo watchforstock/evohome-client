@@ -20,7 +20,7 @@ class Location(EvohomeBase):
             self.status()
 
     def status(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % self.locationId, headers=self.client.headers())
+        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' % self.locationId, headers=self.client._headers())
 
         if r.status_code != requests.codes.ok:
             r.raise_for_status()

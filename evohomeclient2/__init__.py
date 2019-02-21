@@ -39,7 +39,7 @@ class EvohomeClient(EvohomeBase):
         self.user_account()
         self.installation()
 
-    def headers(self):
+    def _headers(self):
         if self.access_token is None or self.access_token_expires is None:
             self._basic_login()
 
@@ -139,7 +139,7 @@ class EvohomeClient(EvohomeBase):
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
 
-        response = requests.get(url, headers=self.headers())
+        response = requests.get(url, headers=self._headers())
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
@@ -154,7 +154,7 @@ class EvohomeClient(EvohomeBase):
                "&includeTemperatureControlSystems=True"
                % self.account_info['userId'])
 
-        response = requests.get(url, headers=self.headers())
+        response = requests.get(url, headers=self._headers())
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
@@ -171,7 +171,7 @@ class EvohomeClient(EvohomeBase):
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
 
-        response = requests.get(url, headers=self.headers())
+        response = requests.get(url, headers=self._headers())
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
@@ -180,7 +180,7 @@ class EvohomeClient(EvohomeBase):
     def gateway(self):
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
-        response = requests.get(url, headers=self.headers())
+        response = requests.get(url, headers=self._headers())
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
