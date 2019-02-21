@@ -96,8 +96,7 @@ class EvohomeClient(EvohomeBase):
             response = self._convert(response.text)
 
             self.access_token = data['access_token']
-            self.access_token_expires = (datetime.now()
-                + timedelta(seconds=data['expires_in']))
+            self.access_token_expires = (datetime.now() + timedelta(seconds=data['expires_in']))
             if credentials['grant_type'] == "password":
                 self.refresh_token = response['refresh_token']
 
