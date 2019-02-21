@@ -101,7 +101,7 @@ class EvohomeClient(EvohomeBase):
         if self.access_token is None or self.access_token_expires is None:
             # token is invalid
             self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
+        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):  # noqa: E501; pylint: line-to-long
             # token has expired
             self._basic_login()
 
@@ -185,7 +185,7 @@ class EvohomeClient(EvohomeBase):
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
-        return self._get_single_heating_system().zone_schedules_backup(filename)  # noqa: E501;  pylint: line-to-long
+        return self._get_single_heating_system().zone_schedules_backup(filename)  # noqa: E501; pylint: line-to-long
 
     def zone_schedules_restore(self, filename):
-        return self._get_single_heating_system().zone_schedules_restore(filename)  # noqa: E501;  pylint: line-to-long
+        return self._get_single_heating_system().zone_schedules_restore(filename)  # noqa: E501; pylint: line-to-long
