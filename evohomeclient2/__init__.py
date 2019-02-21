@@ -94,10 +94,12 @@ class EvohomeClient(EvohomeBase):
 
         try:  # validate the access token
             response = self._convert(response.text)
-            if self.refresh_token is None:
-                self.refresh_token = response['refresh_token']
+
             self.access_token = data['access_token']
-            self.access_token_expires = (datetime.now() + timedelta(seconds=data['expires_in']))
+            self.access_token_expires = (datetime.now()
+                + timedelta(seconds=data['expires_in']))
+            if credentials['grant_type'] == "password":
+                self.refresh_token = response['refresh_token']
 
         except TypeError:
             self.refresh_token = None
