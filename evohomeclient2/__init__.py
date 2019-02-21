@@ -5,8 +5,10 @@ import requests
 from .location import Location
 from .base import EvohomeBase
 
-HEADER_ACCEPT = ("application/json, application/xml, text/json, text/x-json, "
-                 "text/javascript, text/xml")
+HEADER_ACCEPT = (
+    "application/json, application/xml, text/json, text/x-json, "
+    "text/javascript, text/xml"
+)
 HEADER_AUTHORIZATION_BASIC = (
     "Basic "
     "NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Y"
@@ -101,7 +103,7 @@ class EvohomeClient(EvohomeBase):
         if self.access_token is None or self.access_token_expires is None:
             # token is invalid
             self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):  # noqa: E501; pylint: line-to-long
+        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
             # token has expired
             self._basic_login()
 
@@ -185,7 +187,7 @@ class EvohomeClient(EvohomeBase):
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
-        return self._get_single_heating_system().zone_schedules_backup(filename)  # noqa: E501; pylint: line-to-long
+        return self._get_single_heating_system().zone_schedules_backup(filename)
 
     def zone_schedules_restore(self, filename):
-        return self._get_single_heating_system().zone_schedules_restore(filename)  # noqa: E501; pylint: line-to-long
+        return self._get_single_heating_system().zone_schedules_restore(filename)
