@@ -35,6 +35,76 @@ class EvohomeClient(EvohomeBase):
 
         self._login()
 
+    def _login(self):
+        self.user_account()
+        self.installation()
+
+    def headers(self):
+        if self.access_token is None or self.access_token_expires is None:
+            self._basic_login()
+
+        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
+            self._basic_login()
+
+        return {'Accept': HEADER_ACCEPT,
+                'Authorization': 'bearer ' + self.access_token}
+
+    def _basic_login(self):
+        """Obtain an access token from the vendor.
+
+        First, try using the refresh_token, if one is provided, otherwise
+        authenticate using the user credentials."""
+
+        if self.refresh_token is not None:
+            credentials = {'grant_type': "refresh_token",
+                           'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
+                           'refresh_token': self.refresh_token}
+
+            self._obtain_access_token(credentials)  # may: refresh_token = None
+
+        if self.refresh_token is None:
+            credentials = {'grant_type': "password",
+                           'scope': "EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account",
+                           'Username': self.username,
+                           'Password': self.password}
+
+            self._obtain_access_token(credentials)
+
+    def _obtain_access_token(self, credentials):
+        self.access_token = None
+        self.access_token_expires = None
+
+        url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
+        headers = {
+            'Accept': HEADER_ACCEPT,
+            'Authorization': HEADER_AUTHORIZATION_BASIC
+        }
+        data = {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            'Host': 'rs.alarmnet.com/',
+            'Cache-Control': 'no-store no-cache',
+            'Pragma': 'no-cache',
+            'Connection': 'Keep-Alive'
+        }
+        data.update(credentials)
+
+        response = requests.post(url, data=data, headers=headers)
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
+            response.raise_for_status()
+
+        try:  # validate the access token
+            response = self._convert(response.text)
+            if self.refresh_token is None:
+                self.refresh_token = response['refresh_token']
+            self.access_token = data['access_token']
+            self.access_token_expires = (datetime.now() + timedelta(seconds=data['expires_in']))
+
+        except TypeError:
+            self.refresh_token = None
+            return False
+
+        return True
+
     def _get_location(self, location):
         if location is None:
             return self.installation_info[0]['locationInfo']['locationId']
@@ -62,53 +132,6 @@ class EvohomeClient(EvohomeBase):
             raise Exception("More than one control system available")
 
         return control_system
-
-    def _basic_login(self):
-        self.access_token = None
-        self.access_token_expires = None
-
-        url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
-        headers = {
-            'Authorization': HEADER_AUTHORIZATION_BASIC,
-            'Accept': HEADER_ACCEPT
-        }
-        data = {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-            'Host': 'rs.alarmnet.com/',
-            'Cache-Control': 'no-store no-cache',
-            'Pragma': 'no-cache',
-            'grant_type': 'password',
-            'scope': 'EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account',
-            'Username': self.username,
-            'Password': self.password,
-            'Connection': 'Keep-Alive'
-        }
-
-        response = requests.post(url, data=data, headers=headers)
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
-
-        data = self._convert(response.text)
-
-        self.refresh_token = data['refresh_token']
-        self.access_token = data['access_token']
-        self.access_token_expires = (datetime.now() +
-                                     timedelta(seconds=data['expires_in']))
-
-    def _login(self):
-        self.user_account()
-        self.installation()
-
-    def headers(self):
-        if self.access_token is None or self.access_token_expires is None:
-            # token is invalid
-            self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
-            # token has expired
-            self._basic_login()
-
-        return {'Accept': HEADER_ACCEPT,
-                'Authorization': 'bearer ' + self.access_token}
 
     def user_account(self):
         self.account_info = None
