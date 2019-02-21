@@ -94,7 +94,6 @@ class EvohomeClient(EvohomeBase):
 
         try:  # validate the access token
             tokens = self._convert(response.text)
-            print(tokens)
 
             self.access_token = tokens['access_token']
             self.access_token_expires = (datetime.now() + timedelta(seconds=tokens['expires_in']))
