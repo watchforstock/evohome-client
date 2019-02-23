@@ -14,6 +14,10 @@ HEADER_AUTHORIZATION_BASIC = (
     "NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Y"
     "i1hZGQwLTA1OWY5MmM1MzBjYg=="
 )
+HEADER_BASIC_AUTH = {
+    'Accept': HEADER_ACCEPT,
+    'Authorization': HEADER_AUTHORIZATION_BASIC
+}
 
 
 class EvohomeClient(EvohomeBase):
@@ -52,13 +56,12 @@ class EvohomeClient(EvohomeBase):
                 'Authorization': 'bearer ' + self.access_token}
 
     def _basic_login(self):
-        """Obtain an access token from the vendor.
+        """Obtain a (new) access token from the vendor.
 
-        First, try using the refresh_token, if one is provided, otherwise
+        First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials."""
 
-        self.access_token = None
-        self.access_token_expires = None
+        self.access_token = self.access_token_expires = None
 
         if self.refresh_token is not None:
             credentials = {'grant_type': "refresh_token",
@@ -66,6 +69,7 @@ class EvohomeClient(EvohomeBase):
                            'refresh_token': self.refresh_token}
 
             if not self._obtain_access_token(credentials):
+                # invalid refresh_token, silently try username/password instead
                 self.refresh_token = None
 
         if self.refresh_token is None:
@@ -74,39 +78,48 @@ class EvohomeClient(EvohomeBase):
                            'Username': self.username,
                            'Password': self.password}
 
-            self._obtain_access_token(credentials)
+            if not self._obtain_access_token(credentials):
+                raise ValueError("Bad Username/Password, unable to continue.")
 
     def _obtain_access_token(self, credentials):
-        """Get an access token using the supplied credentials."""
+        """Get an access token using the supplied credentials.
+
+        Return False if this is not possible."""
 
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
-        headers = {
-            'Accept': HEADER_ACCEPT,
-            'Authorization': HEADER_AUTHORIZATION_BASIC
-        }
-        data = {
+        payload = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
             'Host': 'rs.alarmnet.com/',
             'Cache-Control': 'no-store no-cache',
             'Pragma': 'no-cache',
             'Connection': 'Keep-Alive'
         }
-        data.update(credentials)
+        payload.update(credentials)  # merge the credentials into the payload
 
-        response = requests.post(url, data=data, headers=headers)
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH)
+
+        if response.status_code == requests.codes.bad_request:                   # pylint: disable=no-member
+            response_json = response.json()
+            if 'error' in response_json:
+                if response_json['error'] == 'invalid_grant':
+                    return False
+            raise requests.HTTPError("Unable to obtain an Access Token: ", response_json)
+
+        response.raise_for_status()
 
         try:  # validate the access token
-            tokens = self._convert(response.text)
+            response_json = response.json()  # this may cause a ValueError
 
-            self.access_token = tokens['access_token']
-            self.access_token_expires = (datetime.now() + timedelta(seconds=tokens['expires_in']))
-            if credentials['grant_type'] == "password":
-                self.refresh_token = tokens['refresh_token']
+            # these may cause a KeyError
+            self.access_token = response_json['access_token']
+            self.access_token_expires = (datetime.now() + timedelta(seconds=response_json['expires_in']))
+            self.refresh_token = response_json['refresh_token']
 
-        except KeyError:
-            return False
+        except KeyError as error:
+            raise KeyError("Unable to obtain an Access Token: ", error)
+
+        except ValueError as error:
+            raise ValueError("Unable to obtain an Access Token: ", error)
 
         return True
 
@@ -144,10 +157,9 @@ class EvohomeClient(EvohomeBase):
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
 
         response = requests.get(url, headers=self._headers())
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
-        self.account_info = self._convert(response.text)
+        self.account_info = response.json()
         return self.account_info
 
     def installation(self):
@@ -159,10 +171,9 @@ class EvohomeClient(EvohomeBase):
                % self.account_info['userId'])
 
         response = requests.get(url, headers=self._headers())
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
-        self.installation_info = self._convert(response.text)
+        self.installation_info = response.json()
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
         for loc_data in self.installation_info:
@@ -176,19 +187,17 @@ class EvohomeClient(EvohomeBase):
                % self._get_location(location))
 
         response = requests.get(url, headers=self._headers())
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
-        return self._convert(response.text)
+        return response.json()
 
     def gateway(self):
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
         response = requests.get(url, headers=self._headers())
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
-        return self._convert(response.text)
+        return response.json()
 
     def set_status_normal(self):
         return self._get_single_heating_system().set_status_normal()
