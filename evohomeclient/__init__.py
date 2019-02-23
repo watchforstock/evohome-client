@@ -255,14 +255,14 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_dhw_on(self, until=None):
-        timex = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-        self._set_dhw(status="Hold", mode="DHWOn", next_time=timex)
+        self._set_dhw(status="Hold", mode="DHWOn", next_time=time_until)
 
     def set_dhw_off(self, until=None):
-        timex = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-        self._set_dhw(status="Hold", mode="DHWOff", next_time=timex)
+        self._set_dhw(status="Hold", mode="DHWOff", next_time=time_until)
 
     def set_dhw_auto(self):
         self._set_dhw(status="Scheduled")
