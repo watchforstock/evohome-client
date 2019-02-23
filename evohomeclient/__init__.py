@@ -234,6 +234,8 @@ class EvohomeClient:
         return None
 
     def _set_dhw(self, status="Scheduled", mode=None, next_time=None):
+        """Set DHW to On, Off or Auto, either indefinitely, or until a
+        specified time."""
         data = {"Status": status,
                 "Mode": mode,
                 "NextTime": next_time,
@@ -255,14 +257,28 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_dhw_on(self, until=None):
+        """Set DHW to on, either indefinitely, or until a specified time.
+
+        When On, the DHW controller will work to keep its target temperature
+        at/above its target temperature.  After the specified time, it will
+        revert to its scheduled behaviour.
+        """
+
         time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOn", next_time=time_until)
 
     def set_dhw_off(self, until=None):
+        """Set DHW to on, either indefinitely, or until a specified time.
+
+        When Off, the DHW controller will ignore its target temperature. After
+        the specified time, it will revert to its scheduled behaviour.
+        """
+
         time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOff", next_time=time_until)
 
     def set_dhw_auto(self):
+        """Set DHW to On or Off, according to its schedule."""
         self._set_dhw(status="Scheduled")
