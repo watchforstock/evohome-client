@@ -1,3 +1,4 @@
+"""evohomeclient is based on the original API for access to Evohome data"""
 from __future__ import print_function
 
 import codecs
@@ -25,10 +26,15 @@ IS_PY2 = (_VER[0] == 2)
 #: Python 3.x?
 IS_PY3 = (_VER[0] == 3)
 
-
 class EvohomeClient:
+    """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes
     def __init__(self, username, password, debug=False, user_data=None):
+        """Constructor. Takes the username and password for the service.
+
+        If user_data is given then this will be used to try and reduce
+        the number of calls to the authentication service which is known
+        to be rate limited"""
         self.username = username
         self.password = password
         self.user_data = user_data
@@ -116,6 +122,7 @@ class EvohomeClient:
         return self.user_data
 
     def temperatures(self, force_refresh=False):
+        """Retrieve the current details for each zone. Returns a generator"""
         self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
             set_point = 0
@@ -128,6 +135,7 @@ class EvohomeClient:
                    'setpoint': set_point}
 
     def get_modes(self, zone):
+        """Returns the set of modes the device can be assigned"""
         self._populate_full_data()
         device = self._get_device(zone)
         return device['thermostat']['allowedModes']
@@ -177,21 +185,27 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_status_normal(self):
+        """Sets the system to normal operation"""
         self._set_status('Auto')
 
     def set_status_custom(self, until=None):
+        """Sets the system to the custom programme"""
         self._set_status('Custom', until)
 
     def set_status_eco(self, until=None):
+        """Sets the system to the eco mode"""
         self._set_status('AutoWithEco', until)
 
     def set_status_away(self, until=None):
+        """Sets the system to the away mode"""
         self._set_status('Away', until)
 
     def set_status_dayoff(self, until=None):
+        """Sets the system to the day off mode"""
         self._set_status('DayOff', until)
 
     def set_status_heatingoff(self, until=None):
+        """Sets the system to the heating off mode"""
         self._set_status('HeatingOff', until)
 
     def _get_device_id(self, zone):
@@ -214,6 +228,7 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_temperature(self, zone, temperature, until=None):
+        """Sets the temperature of the given zone"""
         if until is None:
             data = {"Value": temperature, "Status": "Hold", "NextTime": None}
         else:
@@ -224,6 +239,7 @@ class EvohomeClient:
         self._set_heat_setpoint(zone, data)
 
     def cancel_temp_override(self, zone):
+        """Removes an existing temperature override"""
         data = {"Value": None, "Status": "Scheduled", "NextTime": None}
         self._set_heat_setpoint(zone, data)
 
