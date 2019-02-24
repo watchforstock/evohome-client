@@ -28,7 +28,7 @@ jobs: # A basic unit of work in a run
             - "/usr/local/lib/python3.6/site-packages"
       - run:
           command: |
-            pipenv shell
+            source $(pipenv --venv)/bin/activate
             pylint --disable=C0301 evohomeclient
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
