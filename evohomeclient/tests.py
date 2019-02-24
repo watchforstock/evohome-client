@@ -1,3 +1,4 @@
+"""Tests for evohomeclient package"""
 import requests_mock
 from . import EvohomeClient
 
@@ -25,7 +26,7 @@ VALID_SESSION_RESPONSE = '''{
   }
 }'''
 
-VALID_ZONE_RESPONSE =  '''[
+VALID_ZONE_RESPONSE = '''[
     {
         "locationID": 23456,
         "name": "Home",
@@ -180,9 +181,9 @@ VALID_ZONE_RESPONSE =  '''[
 
 
 @requests_mock.Mocker()
-def test_429_returned_raises_exception(m):
-    # m.post('http://localhost:5050/Auth/OAuth/Token', status_code=429, text='Too Many Requests for url: https://tccna.honeywell.com/Auth/OAuth/Token' )
-    m.post('http://localhost:5050/WebAPI/api/Session', status_code=429, text='''[
+def test_429_returned_raises_exception(mock):
+    """test that exception is raised for a 429 error"""
+    mock.post('http://localhost:5050/WebAPI/api/Session', status_code=429, text='''[
   {
     "code": "TooManyRequests",
     "message": "Request count limitation exceeded, please try again later."
@@ -192,23 +193,24 @@ def test_429_returned_raises_exception(m):
     try:
         client = EvohomeClient("username", "password",
                                hostname="http://localhost:5050")
-        x = list(client.temperatures())
+        list(client.temperatures())
         # Shouldn't get here
         assert False
+    # pylint: disable=bare-except
     except:
         assert True
 
 
 @requests_mock.Mocker()
-def test_valid_login(m):
-    m.post('http://localhost:5050/WebAPI/api/Session', text=VALID_SESSION_RESPONSE)
-    m.get('http://localhost:5050/WebAPI/api/locations?userId=123456&allData=True', text=VALID_ZONE_RESPONSE)
+def test_valid_login(mock):
+    """test valid path"""
+    mock.post('http://localhost:5050/WebAPI/api/Session', text=VALID_SESSION_RESPONSE)
+    mock.get('http://localhost:5050/WebAPI/api/locations?userId=123456&allData=True', text=VALID_ZONE_RESPONSE)
 
     client = EvohomeClient("username", "password",
                            hostname="http://localhost:5050")
-    x = list(client.temperatures())
-    print(x)
+    data = list(client.temperatures())
 
-    assert len(x) == 2
+    assert len(data) == 2
     # assert x[1].name == "RoomName"
-    assert x == [{'thermostat': 'DOMESTIC_HOT_WATER', 'id': 131313, 'name': '', 'temp': 24.01, 'setpoint': 0}, {'thermostat': 'EMEA_ZONE', 'id': 121212, 'name': 'RoomName', 'temp': 17.54, 'setpoint': 15.0}]
+    assert data == [{'thermostat': 'DOMESTIC_HOT_WATER', 'id': 131313, 'name': '', 'temp': 24.01, 'setpoint': 0}, {'thermostat': 'EMEA_ZONE', 'id': 121212, 'name': 'RoomName', 'temp': 17.54, 'setpoint': 15.0}]

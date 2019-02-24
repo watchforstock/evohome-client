@@ -28,7 +28,7 @@ IS_PY3 = (_VER[0] == 3)
 
 class EvohomeClient:
     """Provides a client to access the Honeywell Evohome system"""
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,too-many-arguments
     def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
         """Constructor. Takes the username and password for the service.
 
@@ -79,7 +79,7 @@ class EvohomeClient:
                                     data=json.dumps(self.postdata),
                                     headers=self.headers)
             response.raise_for_status()
-            
+
             self.full_data = self._convert(response.content)[0]
 
             self.location_id = self.full_data['locationID']
