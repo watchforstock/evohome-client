@@ -112,10 +112,9 @@ class EvohomeClient:
                 response.raise_for_status()
             if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
                 if 'code' in response.text:  # don't use response.json()!
-                    raise requests.HTTPError("HTTP Status = " +
-                                             response.status_code +
-                                             ", Response = " +
-                                             response.text)
+                    message = ("HTTP Status = " + str(response.status_code) +
+                               ", Response = " + response.text)
+                    raise requests.HTTPError(message)
 
             self.user_data = self._convert(response.content)
 
