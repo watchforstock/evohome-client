@@ -30,10 +30,10 @@ jobs: # A basic unit of work in a run
       - run:
           command: |
             # source $(pipenv --venv)/bin/activate
-            mkdir test-reports
+            mkdir ~/circleci-evohomeclient/test-reports
             pip install requests
             pylint --disable=C0301 evohomeclient
-            nosetests
+            nosetests --xunit-file=~/circleci-evohomeclient/test-reports/junit.xml
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
