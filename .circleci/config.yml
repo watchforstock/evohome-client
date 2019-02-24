@@ -23,6 +23,13 @@ jobs: # A basic unit of work in a run
     steps:
       - checkout
       - run:
+          command: |
+            sudo pip install nose requests_mock coverage pylint
+      - run:
+          command: |
+            mkdir test-results
+            pip install requests
+      - run:
           name: Test
           command: |
             pylint --disable=C0301 evohomeclient
