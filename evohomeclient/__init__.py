@@ -32,6 +32,7 @@ class EvohomeClient:
         self.username = username
         self.password = password
         self.user_data = user_data
+
         self.full_data = None
         self.gateway_data = None
         self.reader = codecs.getdecoder("utf-8")
@@ -60,11 +61,8 @@ class EvohomeClient:
         if self.full_data is None or force_refresh:
             self._populate_user_info()
 
-            try:
-                user_id = self.user_data['userInfo']['userID']
-                session_id = self.user_data['sessionId']
-            except Exception as error:
-                raise Exception('Invalid user_data: %s' % repr(self.user_data)) from error
+            user_id = self.user_data['userInfo']['userID']
+            session_id = self.user_data['sessionId']
 
             url = ("https://tccna.honeywell.com/WebAPI/api/locations"
                    "?userId=%s&allData=True" % user_id)
@@ -73,21 +71,18 @@ class EvohomeClient:
             response = requests.get(url,
                                     data=json.dumps(self.postdata),
                                     headers=self.headers)
+            response.raise_for_status()
 
             self.full_data = self._convert(response.content)[0]
 
-            try:
-                self.location_id = self.full_data['locationID']
+            self.location_id = self.full_data['locationID']
 
-                self.devices = {}
-                self.named_devices = {}
+            self.devices = {}
+            self.named_devices = {}
 
-                for device in self.full_data['devices']:
-                    self.devices[device['deviceID']] = device
-                    self.named_devices[device['name']] = device
-
-            except Exception as error:
-                raise Exception('Invalid full_data: %s' % repr(self.full_data)) from error
+            for device in self.full_data['devices']:
+                self.devices[device['deviceID']] = device
+                self.named_devices[device['name']] = device
 
     def _populate_gateway_info(self):
         self._populate_full_data()
@@ -96,6 +91,7 @@ class EvohomeClient:
                    "?locationId=%s&allData=False" % self.location_id)
 
             response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
 
             self.gateway_data = self._convert(response.content)[0]
 
@@ -110,6 +106,10 @@ class EvohomeClient:
             response = requests.post(url,
                                      data=json.dumps(self.postdata),
                                      headers=self.headers)
+
+            if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
+                if 'code' in response.text:  # don't use response.json()!
+                    raise requests.HTTPError(response.text)
 
             self.user_data = self._convert(response.content)
 
@@ -145,6 +145,7 @@ class EvohomeClient:
                "?commTaskId=%s" % task_id)
 
         response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
 
         return self._convert(response.content)['state']
 
@@ -170,6 +171,7 @@ class EvohomeClient:
         response = requests.put(url,
                                 data=json.dumps(data),
                                 headers=self.headers)
+        response.raise_for_status()
 
         task_id = self._get_task_id(response)
 
@@ -207,6 +209,7 @@ class EvohomeClient:
                "/%s/thermostat/changeableValues/heatSetpoint" % device_id)
 
         response = requests.put(url, json.dumps(data), headers=self.headers)
+        response.raise_for_status()
 
         task_id = self._get_task_id(response)
 
@@ -250,6 +253,7 @@ class EvohomeClient:
         response = requests.put(url,
                                 data=json.dumps(data),
                                 headers=self.headers)
+        response.raise_for_status()
 
         task_id = self._get_task_id(response)
 
