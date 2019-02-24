@@ -37,8 +37,8 @@ jobs: # A basic unit of work in a run
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-          path: test-results
-          destination: tr1
+          path: htmlcov
+          destination: coverate
 workflows:
   version: 2
   build_and_test:
