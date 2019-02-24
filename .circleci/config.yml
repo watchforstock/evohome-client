@@ -19,6 +19,7 @@ jobs: # A basic unit of work in a run
           command: |
             sudo pip install pipenv
             sudo pip install pylint
+            sudo pip install nose requests_mock coverage
             pipenv install
       - save_cache: # cache Python dependencies using checksum of Pipfile as the cache-key
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
@@ -30,7 +31,7 @@ jobs: # A basic unit of work in a run
           command: |
             # source $(pipenv --venv)/bin/activate
             mkdir test-reports
-            pip install requests nose requests_mock coverage
+            pip install requests
             pylint --disable=C0301 evohomeclient
             nosetests
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
