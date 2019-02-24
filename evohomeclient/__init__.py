@@ -29,7 +29,7 @@ IS_PY3 = (_VER[0] == 3)
 class EvohomeClient:
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, username, password, debug=False, user_data=None):
+    def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
         """Constructor. Takes the username and password for the service.
 
         If user_data is given then this will be used to try and reduce
@@ -38,6 +38,7 @@ class EvohomeClient:
         self.username = username
         self.password = password
         self.user_data = user_data
+        self.hostname = hostname
 
         self.full_data = None
         self.gateway_data = None
@@ -70,7 +71,7 @@ class EvohomeClient:
             user_id = self.user_data['userInfo']['userID']
             session_id = self.user_data['sessionId']
 
-            url = ("https://tccna.honeywell.com/WebAPI/api/locations"
+            url = (self.hostname + "/WebAPI/api/locations"
                    "?userId=%s&allData=True" % user_id)
             self.headers['sessionId'] = session_id
 
@@ -78,7 +79,7 @@ class EvohomeClient:
                                     data=json.dumps(self.postdata),
                                     headers=self.headers)
             response.raise_for_status()
-
+            
             self.full_data = self._convert(response.content)[0]
 
             self.location_id = self.full_data['locationID']
@@ -93,7 +94,7 @@ class EvohomeClient:
     def _populate_gateway_info(self):
         self._populate_full_data()
         if self.gateway_data is None:
-            url = ("https://tccna.honeywell.com/WebAPI/api/gateways"
+            url = (self.hostname + "/WebAPI/api/gateways"
                    "?locationId=%s&allData=False" % self.location_id)
 
             response = requests.get(url, headers=self.headers)
@@ -103,7 +104,7 @@ class EvohomeClient:
 
     def _populate_user_info(self):
         if self.user_data is None:
-            url = "https://tccna.honeywell.com/WebAPI/api/Session"
+            url = self.hostname + "/WebAPI/api/Session"
             self.postdata = {'Username': self.username,
                              'Password': self.password,
                              'ApplicationId': '91db1612-73fd-4500-91b2-e63b069b185c'}
@@ -154,7 +155,7 @@ class EvohomeClient:
 
     def _get_task_status(self, task_id):
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/commTasks"
+        url = (self.hostname + "/WebAPI/api/commTasks"
                "?commTaskId=%s" % task_id)
 
         response = requests.get(url, headers=self.headers)
@@ -173,7 +174,7 @@ class EvohomeClient:
 
     def _set_status(self, status, until=None):
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/evoTouchSystems"
+        url = (self.hostname + "/WebAPI/api/evoTouchSystems"
                "?locationId=%s" % self.location_id)
 
         if until is None:
@@ -224,7 +225,7 @@ class EvohomeClient:
 
         device_id = self._get_device_id(zone)
 
-        url = ("https://tccna.honeywell.com/WebAPI/api/devices"
+        url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues/heatSetpoint" % device_id)
 
         response = requests.put(url, json.dumps(data), headers=self.headers)
@@ -268,7 +269,7 @@ class EvohomeClient:
                 "CoolSetpoint": None}
 
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/devices"
+        url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues" % self._get_dhw_zone())
 
         response = requests.put(url,
