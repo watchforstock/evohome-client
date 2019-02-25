@@ -30,5 +30,5 @@ class EvohomeBase(object):
             requests_log.setLevel(logging.INFO)
             requests_log.propagate = False
 
-    def _convert(self, object):
-        return json.loads(object)
+    def _convert(self, obj):
+        return json.loads(obj)

@@ -1,3 +1,4 @@
+"""Provides a client for the updated Evohome API"""
 from __future__ import print_function
 from datetime import datetime, timedelta
 import requests
@@ -25,8 +26,15 @@ class EvohomeClient(EvohomeBase):
                  access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
+        self.access_token = None
+        self.access_token_expires = None
         self.username = username
         self.password = password
+        self._headers = {}
+        self.account_info = None
+        self.locations = []
+        self.installation_info = {}
+        self.system_id = ""
 
         self.access_token = access_token
         self.access_token_expires = access_token_expires
@@ -103,7 +111,8 @@ class EvohomeClient(EvohomeBase):
             if 'error' in response_json:
                 if response_json['error'] == 'invalid_grant':
                     return False
-            raise requests.HTTPError("Unable to obtain an Access Token: ", response_json)
+            raise requests.HTTPError(
+                "Unable to obtain an Access Token: ", response_json)
 
         response.raise_for_status()
 
@@ -112,7 +121,8 @@ class EvohomeClient(EvohomeBase):
 
             # these may cause a KeyError
             self.access_token = response_json['access_token']
-            self.access_token_expires = (datetime.now() + timedelta(seconds=response_json['expires_in']))
+            self.access_token_expires = (
+                datetime.now() + timedelta(seconds=response_json['expires_in']))
             self.refresh_token = response_json['refresh_token']
 
         except KeyError as error:
@@ -139,6 +149,8 @@ class EvohomeClient(EvohomeBase):
         else:
             raise Exception("More than one location available")
 
+
+<< << << < HEAD
         if len(location._gateways) == 1:                                         # pylint: disable=protected-access
             gateway = location._gateways[0]                                      # pylint: disable=protected-access
         else:
@@ -150,9 +162,73 @@ class EvohomeClient(EvohomeBase):
             raise Exception("More than one control system available")
 
         return control_system
+== == == =
+        if len(location._gateways) == 1:
+            gateway = location._gateways[0]
+        else:
+            raise Exception("More than one gateway available")
+
+        if len(gateway._control_systems) == 1:
+            control_system = gateway._control_systems[0]
+        else:
+            raise Exception("More than one control system available")
+
+        return control_system
+
+    def _basic_login(self):
+        self.access_token = None
+        self.access_token_expires = None
+
+        url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
+        headers = {
+            'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
+            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+        }
+        data = {
+            'Content-Type':	'application/x-www-form-urlencoded; charset=utf-8',
+            'Host':	'rs.alarmnet.com/',
+            'Cache-Control': 'no-store no-cache',
+            'Pragma':	'no-cache',
+            'grant_type':	'password',
+            'scope':	'EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account',
+            'Username':	self.username,
+            'Password':	self.password,
+            'Connection':	'Keep-Alive'
+        }
+        req = requests.post(url, data=data, headers=headers)
+
+        if req.status_code != requests.codes.ok:
+            req.raise_for_status()
+
+        data = self._convert(req.text)
+        self.access_token = data['access_token']
+        self.access_token_expires = datetime.now(
+        ) + timedelta(seconds=data['expires_in'])
+
+        self._headers = {
+            'Authorization': 'bearer ' + self.access_token,
+            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
+        }
+
+    def _login(self):
+        self._basic_login()
+        self.user_account()
+        self.installation()
+
+    def headers(self):
+        if self.access_token is None or self.access_token_expires is None:
+            # token is invalid
+            self._basic_login()
+        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
+            # token has expired
+            self._basic_login()
+        return self._headers
+>>>>>>> Initial pylint improvements
 
     def user_account(self):
+        """Gets user account information"""
         self.account_info = None
+<<<<<<< HEAD
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
 
@@ -160,10 +236,21 @@ class EvohomeClient(EvohomeBase):
         response.raise_for_status()
 
         self.account_info = response.json()
+=======
+        req = requests.get(
+            'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
+
+        if req.status_code != requests.codes.ok:
+            req.raise_for_status()
+
+        self.account_info = self._convert(req.text)
+>>>>>>> Initial pylint improvements
         return self.account_info
 
     def installation(self):
+        """Returns details of the installation"""
         self.locations = []
+<<<<<<< HEAD
 
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/installationInfo?userId=%s"
@@ -174,6 +261,15 @@ class EvohomeClient(EvohomeBase):
         response.raise_for_status()
 
         self.installation_info = response.json()
+=======
+        req = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' %
+                           self.account_info['userId'], headers=self.headers())
+
+        if req.status_code != requests.codes.ok:
+            req.raise_for_status()
+
+        self.installation_info = self._convert(req.text)
+>>>>>>> Initial pylint improvements
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
         for loc_data in self.installation_info:
@@ -182,6 +278,7 @@ class EvohomeClient(EvohomeBase):
         return self.installation_info
 
     def full_installation(self, location=None):
+<<<<<<< HEAD
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
@@ -198,33 +295,63 @@ class EvohomeClient(EvohomeBase):
         response.raise_for_status()
 
         return response.json()
+=======
+        location = self._get_location(location)
+        req = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' %
+                           location, headers=self.headers())
+
+        if req.status_code != requests.codes.ok:
+            req.raise_for_status()
+
+        return self._convert(req.text)
+
+    def gateway(self):
+        """Gets details of the system gateway"""
+        req = requests.get(
+            'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
+
+        if req.status_code != requests.codes.ok:
+            req.raise_for_status()
+
+        return self._convert(req.text)
+>>>>>>> Initial pylint improvements
 
     def set_status_normal(self):
+        """Sets the system into normal heating mode"""
         return self._get_single_heating_system().set_status_normal()
 
     def set_status_reset(self):
+        """Resets the system mode"""
         return self._get_single_heating_system().set_status_reset()
 
     def set_status_custom(self, until=None):
+        """Sets the system into custom heating mode"""
         return self._get_single_heating_system().set_status_custom(until)
 
     def set_status_eco(self, until=None):
+        """Sets the system into eco heating mode"""
         return self._get_single_heating_system().set_status_eco(until)
 
     def set_status_away(self, until=None):
+        """Sets the system into away heating mode"""
         return self._get_single_heating_system().set_status_away(until)
 
     def set_status_dayoff(self, until=None):
+        """Sets the system into day off heating mode"""
         return self._get_single_heating_system().set_status_dayoff(until)
 
     def set_status_heatingoff(self, until=None):
+        """Sets the system into heating off heating mode"""
         return self._get_single_heating_system().set_status_heatingoff(until)
 
     def temperatures(self):
+        """Returns the current zone temperatures and set points"""
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
+        """Backs up the current system configuration to the given file"""
         return self._get_single_heating_system().zone_schedules_backup(filename)
 
     def zone_schedules_restore(self, filename):
+        """Restores the current system configuration from the given file"""
         return self._get_single_heating_system().zone_schedules_restore(filename)
