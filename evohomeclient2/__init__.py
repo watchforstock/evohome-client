@@ -21,7 +21,10 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(EvohomeBase):
+class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attributes
+    """Provides access to the Evohome API"""
+
+    # pylint: disable=too-many-arguments
     def __init__(self, username, password, debug=False, refresh_token=None,
                  access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
@@ -30,7 +33,6 @@ class EvohomeClient(EvohomeBase):
         self.access_token_expires = None
         self.username = username
         self.password = password
-        self._headers = {}
         self.account_info = None
         self.locations = []
         self.installation_info = {}
@@ -149,27 +151,13 @@ class EvohomeClient(EvohomeBase):
         else:
             raise Exception("More than one location available")
 
-
-<< << << < HEAD
-        if len(location._gateways) == 1:                                         # pylint: disable=protected-access
-            gateway = location._gateways[0]                                      # pylint: disable=protected-access
+        if len(location._gateways) == 1:  # pylint: disable=protected-access
+            gateway = location._gateways[0]  # pylint: disable=protected-access
         else:
             raise Exception("More than one gateway available")
 
-        if len(gateway._control_systems) == 1:                                   # pylint: disable=protected-access
-            control_system = gateway._control_systems[0]                         # pylint: disable=protected-access
-        else:
-            raise Exception("More than one control system available")
-
-        return control_system
-== == == =
-        if len(location._gateways) == 1:
-            gateway = location._gateways[0]
-        else:
-            raise Exception("More than one gateway available")
-
-        if len(gateway._control_systems) == 1:
-            control_system = gateway._control_systems[0]
+        if len(gateway._control_systems) == 1:  # pylint: disable=protected-access
+            control_system = gateway._control_systems[0]  # pylint: disable=protected-access
         else:
             raise Exception("More than one control system available")
 
@@ -195,40 +183,24 @@ class EvohomeClient(EvohomeBase):
             'Password':	self.password,
             'Connection':	'Keep-Alive'
         }
-        req = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, data=data, headers=headers)
 
-        if req.status_code != requests.codes.ok:
-            req.raise_for_status()
+        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
+            response.raise_for_status()
 
-        data = self._convert(req.text)
+        data = self._convert(response.text)
         self.access_token = data['access_token']
         self.access_token_expires = datetime.now(
         ) + timedelta(seconds=data['expires_in'])
-
-        self._headers = {
-            'Authorization': 'bearer ' + self.access_token,
-            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
-        }
 
     def _login(self):
         self._basic_login()
         self.user_account()
         self.installation()
 
-    def headers(self):
-        if self.access_token is None or self.access_token_expires is None:
-            # token is invalid
-            self._basic_login()
-        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
-            # token has expired
-            self._basic_login()
-        return self._headers
->>>>>>> Initial pylint improvements
-
     def user_account(self):
         """Gets user account information"""
         self.account_info = None
-<<<<<<< HEAD
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
 
@@ -236,21 +208,11 @@ class EvohomeClient(EvohomeBase):
         response.raise_for_status()
 
         self.account_info = response.json()
-=======
-        req = requests.get(
-            'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount', headers=self.headers())
-
-        if req.status_code != requests.codes.ok:
-            req.raise_for_status()
-
-        self.account_info = self._convert(req.text)
->>>>>>> Initial pylint improvements
         return self.account_info
 
     def installation(self):
         """Returns details of the installation"""
         self.locations = []
-<<<<<<< HEAD
 
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/installationInfo?userId=%s"
@@ -261,15 +223,6 @@ class EvohomeClient(EvohomeBase):
         response.raise_for_status()
 
         self.installation_info = response.json()
-=======
-        req = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=%s&includeTemperatureControlSystems=True' %
-                           self.account_info['userId'], headers=self.headers())
-
-        if req.status_code != requests.codes.ok:
-            req.raise_for_status()
-
-        self.installation_info = self._convert(req.text)
->>>>>>> Initial pylint improvements
         self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
 
         for loc_data in self.installation_info:
@@ -278,7 +231,7 @@ class EvohomeClient(EvohomeBase):
         return self.installation_info
 
     def full_installation(self, location=None):
-<<<<<<< HEAD
+        """Retrieves full details of the installation"""
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
@@ -289,32 +242,13 @@ class EvohomeClient(EvohomeBase):
         return response.json()
 
     def gateway(self):
+        """Retrieves details of the gateway"""
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
         response = requests.get(url, headers=self._headers())
         response.raise_for_status()
 
         return response.json()
-=======
-        location = self._get_location(location)
-        req = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/installationInfo?includeTemperatureControlSystems=True' %
-                           location, headers=self.headers())
-
-        if req.status_code != requests.codes.ok:
-            req.raise_for_status()
-
-        return self._convert(req.text)
-
-    def gateway(self):
-        """Gets details of the system gateway"""
-        req = requests.get(
-            'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway', headers=self.headers())
-
-        if req.status_code != requests.codes.ok:
-            req.raise_for_status()
-
-        return self._convert(req.text)
->>>>>>> Initial pylint improvements
 
     def set_status_normal(self):
         """Sets the system into normal heating mode"""

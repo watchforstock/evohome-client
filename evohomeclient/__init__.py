@@ -26,9 +26,11 @@ IS_PY2 = (_VER[0] == 2)
 #: Python 3.x?
 IS_PY3 = (_VER[0] == 3)
 
+
 class EvohomeClient:
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
+
     def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
         """Constructor. Takes the username and password for the service.
 
@@ -133,7 +135,8 @@ class EvohomeClient:
         for device in self.full_data['devices']:
             set_point = 0
             if 'heatSetpoint' in device['thermostat']['changeableValues']:
-                set_point = float(device['thermostat']['changeableValues']["heatSetpoint"]["value"])
+                set_point = float(
+                    device['thermostat']['changeableValues']["heatSetpoint"]["value"])
             yield {'thermostat': device['thermostatModelType'],
                    'id': device['deviceID'],
                    'name': device['name'],
@@ -180,7 +183,10 @@ class EvohomeClient:
         if until is None:
             data = {"QuickAction": status, "QuickActionNextTime": None}
         else:
-            data = {"QuickAction": status, "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')}
+            data = {
+                "QuickAction": status,
+                "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')
+            }
 
         response = requests.put(url,
                                 data=json.dumps(data),
@@ -290,7 +296,8 @@ class EvohomeClient:
         revert to its scheduled behaviour.
         """
 
-        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOn", next_time=time_until)
 
@@ -301,7 +308,8 @@ class EvohomeClient:
         the specified time, it will revert to its scheduled behaviour.
         """
 
-        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOff", next_time=time_until)
 
