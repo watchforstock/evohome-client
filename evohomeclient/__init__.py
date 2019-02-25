@@ -107,7 +107,7 @@ class EvohomeClient:
                                      data=json.dumps(self.postdata),
                                      headers=self.headers)
 
-            # catch 429/too_many_requests first, for consistency
+            # catch 429/too_many_requests first, for a consistent experience
             if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
                 response.raise_for_status()
             if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
@@ -115,6 +115,7 @@ class EvohomeClient:
                     message = ("HTTP Status = " + str(response.status_code) +
                                ", Response = " + response.text)
                     raise requests.HTTPError(message)
+                response.raise_for_status()
 
             self.user_data = self._convert(response.content)
 
