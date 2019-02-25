@@ -1,3 +1,4 @@
+"""evohomeclient is based on the original API for access to Evohome data"""
 from __future__ import print_function
 
 import codecs
@@ -27,11 +28,19 @@ IS_PY3 = (_VER[0] == 3)
 
 
 class EvohomeClient:
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, username, password, debug=False, user_data=None):
+    """Provides a client to access the Honeywell Evohome system"""
+    # pylint: disable=too-many-instance-attributes,too-many-arguments
+
+    def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
+        """Constructor. Takes the username and password for the service.
+
+        If user_data is given then this will be used to try and reduce
+        the number of calls to the authentication service which is known
+        to be rate limited"""
         self.username = username
         self.password = password
         self.user_data = user_data
+        self.hostname = hostname
 
         self.full_data = None
         self.gateway_data = None
@@ -64,7 +73,7 @@ class EvohomeClient:
             user_id = self.user_data['userInfo']['userID']
             session_id = self.user_data['sessionId']
 
-            url = ("https://tccna.honeywell.com/WebAPI/api/locations"
+            url = (self.hostname + "/WebAPI/api/locations"
                    "?userId=%s&allData=True" % user_id)
             self.headers['sessionId'] = session_id
 
@@ -87,7 +96,7 @@ class EvohomeClient:
     def _populate_gateway_info(self):
         self._populate_full_data()
         if self.gateway_data is None:
-            url = ("https://tccna.honeywell.com/WebAPI/api/gateways"
+            url = (self.hostname + "/WebAPI/api/gateways"
                    "?locationId=%s&allData=False" % self.location_id)
 
             response = requests.get(url, headers=self.headers)
@@ -97,7 +106,7 @@ class EvohomeClient:
 
     def _populate_user_info(self):
         if self.user_data is None:
-            url = "https://tccna.honeywell.com/WebAPI/api/Session"
+            url = self.hostname + "/WebAPI/api/Session"
             self.postdata = {'Username': self.username,
                              'Password': self.password,
                              'ApplicationId': '91db1612-73fd-4500-91b2-e63b069b185c'}
@@ -121,11 +130,13 @@ class EvohomeClient:
         return self.user_data
 
     def temperatures(self, force_refresh=False):
+        """Retrieve the current details for each zone. Returns a generator"""
         self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
             set_point = 0
             if 'heatSetpoint' in device['thermostat']['changeableValues']:
-                set_point = float(device['thermostat']['changeableValues']["heatSetpoint"]["value"])
+                set_point = float(
+                    device['thermostat']['changeableValues']["heatSetpoint"]["value"])
             yield {'thermostat': device['thermostatModelType'],
                    'id': device['deviceID'],
                    'name': device['name'],
@@ -133,6 +144,7 @@ class EvohomeClient:
                    'setpoint': set_point}
 
     def get_modes(self, zone):
+        """Returns the set of modes the device can be assigned"""
         self._populate_full_data()
         device = self._get_device(zone)
         return device['thermostat']['allowedModes']
@@ -146,7 +158,7 @@ class EvohomeClient:
 
     def _get_task_status(self, task_id):
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/commTasks"
+        url = (self.hostname + "/WebAPI/api/commTasks"
                "?commTaskId=%s" % task_id)
 
         response = requests.get(url, headers=self.headers)
@@ -165,13 +177,16 @@ class EvohomeClient:
 
     def _set_status(self, status, until=None):
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/evoTouchSystems"
+        url = (self.hostname + "/WebAPI/api/evoTouchSystems"
                "?locationId=%s" % self.location_id)
 
         if until is None:
             data = {"QuickAction": status, "QuickActionNextTime": None}
         else:
-            data = {"QuickAction": status, "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')}
+            data = {
+                "QuickAction": status,
+                "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')
+            }
 
         response = requests.put(url,
                                 data=json.dumps(data),
@@ -184,21 +199,27 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_status_normal(self):
+        """Sets the system to normal operation"""
         self._set_status('Auto')
 
     def set_status_custom(self, until=None):
+        """Sets the system to the custom programme"""
         self._set_status('Custom', until)
 
     def set_status_eco(self, until=None):
+        """Sets the system to the eco mode"""
         self._set_status('AutoWithEco', until)
 
     def set_status_away(self, until=None):
+        """Sets the system to the away mode"""
         self._set_status('Away', until)
 
     def set_status_dayoff(self, until=None):
+        """Sets the system to the day off mode"""
         self._set_status('DayOff', until)
 
     def set_status_heatingoff(self, until=None):
+        """Sets the system to the heating off mode"""
         self._set_status('HeatingOff', until)
 
     def _get_device_id(self, zone):
@@ -210,7 +231,7 @@ class EvohomeClient:
 
         device_id = self._get_device_id(zone)
 
-        url = ("https://tccna.honeywell.com/WebAPI/api/devices"
+        url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues/heatSetpoint" % device_id)
 
         response = requests.put(url, json.dumps(data), headers=self.headers)
@@ -222,6 +243,7 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_temperature(self, zone, temperature, until=None):
+        """Sets the temperature of the given zone"""
         if until is None:
             data = {"Value": temperature, "Status": "Hold", "NextTime": None}
         else:
@@ -232,6 +254,7 @@ class EvohomeClient:
         self._set_heat_setpoint(zone, data)
 
     def cancel_temp_override(self, zone):
+        """Removes an existing temperature override"""
         data = {"Value": None, "Status": "Scheduled", "NextTime": None}
         self._set_heat_setpoint(zone, data)
 
@@ -252,7 +275,7 @@ class EvohomeClient:
                 "CoolSetpoint": None}
 
         self._populate_full_data()
-        url = ("https://tccna.honeywell.com/WebAPI/api/devices"
+        url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues" % self._get_dhw_zone())
 
         response = requests.put(url,
@@ -273,7 +296,8 @@ class EvohomeClient:
         revert to its scheduled behaviour.
         """
 
-        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOn", next_time=time_until)
 
@@ -284,7 +308,8 @@ class EvohomeClient:
         the specified time, it will revert to its scheduled behaviour.
         """
 
-        time_until = None if until is None else until.strftime('%Y-%m-%dT%H:%M:%SZ')
+        time_until = None if until is None else until.strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
 
         self._set_dhw(status="Hold", mode="DHWOff", next_time=time_until)
 
