@@ -29,23 +29,17 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
                  access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
 
-        self.access_token = None
-        self.access_token_expires = None
         self.username = username
         self.password = password
-        self.account_info = None
-        self.locations = []
-        self.installation_info = {}
-        self.system_id = ""
 
+        self.refresh_token = refresh_token
         self.access_token = access_token
         self.access_token_expires = access_token_expires
-        self.refresh_token = refresh_token
 
         self.account_info = None
-        self.system_id = None
         self.locations = None
         self.installation_info = None
+        self.system_id = None
 
         self._login()
 
@@ -162,41 +156,6 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
             raise Exception("More than one control system available")
 
         return control_system
-
-    def _basic_login(self):
-        self.access_token = None
-        self.access_token_expires = None
-
-        url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
-        headers = {
-            'Authorization':	'Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==',
-            'Accept': 'application/json, application/xml, text/json, text/x-json, text/javascript, text/xml'
-        }
-        data = {
-            'Content-Type':	'application/x-www-form-urlencoded; charset=utf-8',
-            'Host':	'rs.alarmnet.com/',
-            'Cache-Control': 'no-store no-cache',
-            'Pragma':	'no-cache',
-            'grant_type':	'password',
-            'scope':	'EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account',
-            'Username':	self.username,
-            'Password':	self.password,
-            'Connection':	'Keep-Alive'
-        }
-        response = requests.post(url, data=data, headers=headers)
-
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
-            response.raise_for_status()
-
-        data = self._convert(response.text)
-        self.access_token = data['access_token']
-        self.access_token_expires = datetime.now(
-        ) + timedelta(seconds=data['expires_in'])
-
-    def _login(self):
-        self._basic_login()
-        self.user_account()
-        self.installation()
 
     def user_account(self):
         """Gets user account information"""
