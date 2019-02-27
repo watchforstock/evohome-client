@@ -4,7 +4,7 @@ import sys
 
 VERSION = "0.2.8.1"
 
-class VerifyVersionCommand(install):
+class VerifyVersionCommand(*args, **kwargs):
     """Custom command to verify that the git tag matches our version"""
     description = 'verify that the git tag matches our version'
 

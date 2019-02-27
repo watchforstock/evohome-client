@@ -51,6 +51,10 @@ jobs: # A basic unit of work in a run
           command: |
             pip install requests
       - run:
+          name: verify git tag vs. version
+          command: |
+            python setup.py verify
+      - run:
           name: Build
           command: |
             # create a source distribution
