@@ -42,15 +42,15 @@ class EvohomeClient:
         self.user_data = user_data
         self.hostname = hostname
 
-        self.full_data = None
-        self.gateway_data = None
+        self.full_data = {}
+        self.gateway_data = {}
         self.reader = codecs.getdecoder("utf-8")
 
-        self.location_id = None
-        self.devices = None
-        self.named_devices = None
-        self.postdata = None
-        self.headers = None
+        self.location_id = ""
+        self.devices = {}
+        self.named_devices = {}
+        self.postdata = {}
+        self.headers = {}
 
         if debug is True:
             http_client.HTTPConnection.debuglevel = 1
