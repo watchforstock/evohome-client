@@ -38,7 +38,35 @@ jobs: # A basic unit of work in a run
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
           path: htmlcov
-          destination: coverate
+          destination: coverage
+  deploy:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run:
+          command: |
+            sudo pip install nose requests_mock coverage pylint twine
+      - run:
+          command: |
+            pip install requests
+      - run:
+          name: Build
+          command: |
+            # create a source distribution
+            python setup.py sdist
+            # create a wheel
+            python setup.py bdist_wheel
+      - run:
+          name: init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = watchforstock" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc            
+      - run:
+          name: upload to pypi
+          command: |
+            twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 workflows:
   version: 2
   build_and_test:
@@ -46,4 +74,17 @@ workflows:
       - build
       - test:
           requires:
-            - build          
+            - build   
+  deploy:
+    jobs:
+      -  test:
+          requires:
+            - build     
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
