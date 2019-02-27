@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 import sys
 
-VERSION = "0.2.8"
+VERSION = "0.2.8.1"
 
 class VerifyVersionCommand(install):
     """Custom command to verify that the git tag matches our version"""
