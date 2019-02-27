@@ -1,6 +1,6 @@
 version: 2 # use CircleCI 2.0
 jobs: # A basic unit of work in a run
-  build: # runs not using Workflows must have a `build` job as entry point 
+  build: # runs not using Workflows must have a `build` job as entry point
     # directory where steps are run
     working_directory: ~/circleci-evohomeclient
     docker: # run the steps with Docker
@@ -62,7 +62,7 @@ jobs: # A basic unit of work in a run
           command: |
             echo -e "[pypi]" >> ~/.pypirc
             echo -e "username = watchforstock" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc            
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
       - run:
           name: upload to pypi
           command: |
@@ -74,13 +74,13 @@ workflows:
       - build
       - test:
           requires:
-            - build   
+            - build
   deploy:
     jobs:
       - build
       - test:
           requires:
-            - build     
+            - build
       - deploy:
           requires:
             - build
