@@ -42,8 +42,8 @@ class EvohomeClient:
         self.user_data = user_data
         self.hostname = hostname
 
-        self.full_data = {}
-        self.gateway_data = {}
+        self.full_data = None
+        self.gateway_data = None
         self.reader = codecs.getdecoder("utf-8")
 
         self.location_id = ""
