@@ -1,10 +1,12 @@
-from setuptools import setup
 import os
 import sys
 
+from setuptools import setup
+from setuptools.command.install import install
+
 VERSION = "0.2.8.1"
 
-class VerifyVersionCommand(*args, **kwargs):
+class VerifyVersionCommand(install):
     """Custom command to verify that the git tag matches our version"""
     description = 'verify that the git tag matches our version'
 
