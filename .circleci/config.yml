@@ -65,9 +65,12 @@ jobs: # A basic unit of work in a run
           name: init .pypirc
           command: |
             echo -e "[pypi]" >> ~/.pypirc
+            echo -e "repository = https://pypi.python.org/pypi" >> ~/.pypirc
             echo -e "username = watchforstock" >> ~/.pypirc
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+            echo -e "" >> ~/.pypirc
             echo -e "[test]" >> ~/.pypirc
+            echo -e "repository = https://testpypi.python.org/pypi" >> ~/.pypirc
             echo -e "username = watchforstock" >> ~/.pypirc
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
       - run:
