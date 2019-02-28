@@ -8,12 +8,13 @@ from .zone import ZoneBase
 class HotWater(ZoneBase):
     """Provides handling of the hot water zone"""
 
-    def __init__(self, client, data=None):
+    def __init__(self, client, data):
+        self.dhwId = None                                                        # pylint: disable=invalid-name
+        self.zone_type = 'domesticHotWater'
+
         super(HotWater, self).__init__(client, data)
 
-        self.zone_type = 'domesticHotWater'
-        if data is not None:
-            self.zoneId = self.dhwId                                             # pylint: disable=no-member
+        self.zoneId = self.dhwId
 
     def _set_dhw(self, data):
         headers = dict(self.client._headers())                                   # pylint: disable=protected-access
