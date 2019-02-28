@@ -28,12 +28,11 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attributes
+class EvohomeClient(EvohomeBase):                                                # pylint: disable=too-many-instance-attributes
     """Provides access to the Evohome API."""
 
-    # pylint: disable=too-many-arguments
     def __init__(self, username, password, debug=False, refresh_token=None,
-                 access_token=None, access_token_expires=None):
+                 access_token=None, access_token_expires=None):                  # pylint: disable=too-many-arguments
         super(EvohomeClient, self).__init__(debug)
 
         if debug is not True:
@@ -158,13 +157,13 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         else:
             raise Exception("More than one location available")
 
-        if len(location._gateways) == 1:  # pylint: disable=protected-access
-            gateway = location._gateways[0]  # pylint: disable=protected-access
+        if len(location._gateways) == 1:                                         # pylint: disable=protected-access
+            gateway = location._gateways[0]                                      # pylint: disable=protected-access
         else:
             raise Exception("More than one gateway available")
 
-        if len(gateway._control_systems) == 1:  # pylint: disable=protected-access
-            control_system = gateway._control_systems[0]  # pylint: disable=protected-access
+        if len(gateway._control_systems) == 1:                                   # pylint: disable=protected-access
+            control_system = gateway._control_systems[0]                         # pylint: disable=protected-access
         else:
             raise Exception("More than one control system available")
 

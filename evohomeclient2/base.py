@@ -18,7 +18,7 @@ class EvohomeClientInvalidPostData(Exception):
     """Used when data has been incorrectly sent"""
 
 
-class EvohomeBase(object):  # pylint: disable=too-few-public-methods
+class EvohomeBase(object):                                                       # pylint: disable=too-few-public-methods
     """Base class for evohomeclient"""
 
     def __init__(self, debug=False):
@@ -31,5 +31,5 @@ class EvohomeBase(object):  # pylint: disable=too-few-public-methods
             REQUESTS_LOGGER.propagate = True
             http_client.HTTPConnection.debuglevel = 1
 
-    def _convert(self, obj):  # pylint: disable=no-self-use
+    def _convert(self, obj):                                                     # pylint: disable=no-self-use
         return json.loads(obj)

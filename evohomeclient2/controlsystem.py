@@ -31,8 +31,8 @@ class ControlSystem(EvohomeBase):
             for _, z_data in enumerate(data['zones']):
                 zone = Zone(client, z_data)
                 self._zones.append(zone)
-                self.zones[zone.name] = zone   # pylint: disable=no-member
-                self.zones_by_id[zone.zoneId] = zone  # pylint: disable=no-member
+                self.zones[zone.name] = zone                                     # pylint: disable=no-member
+                self.zones_by_id[zone.zoneId] = zone                             # pylint: disable=no-member
 
             if 'dhw' in data:
                 self.hotwater = HotWater(client, data['dhw'])
@@ -55,7 +55,7 @@ class ControlSystem(EvohomeBase):
         response = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' %
                                 self.systemId, data=json.dumps(data), headers=headers)  # pylint: disable=no-member
 
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
     def set_status_normal(self):
@@ -90,9 +90,9 @@ class ControlSystem(EvohomeBase):
         """Returns a generator with the details of each zone"""
         if self.hotwater:
             yield {'thermostat': 'DOMESTIC_HOT_WATER',
-                   'id': self.hotwater.dhwId,  # pylint: disable=no-member
+                   'id': self.hotwater.dhwId,                                    # pylint: disable=no-member
                    'name': '',
-                   'temp': self.hotwater.temperatureStatus['temperature'],  # pylint: disable=no-member
+                   'temp': self.hotwater.temperatureStatus['temperature'],       # pylint: disable=no-member
                    'setpoint': ''}
 
         for zone in self._zones:
@@ -148,4 +148,5 @@ class ControlSystem(EvohomeBase):
                 else:
                     self.zones_by_id[zone_id].set_schedule(
                         json.dumps(zone_info))
+
         print("Restored zone schedules from: %s" % filename)

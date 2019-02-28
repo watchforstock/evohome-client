@@ -1,6 +1,7 @@
 """Provides handling of individual zones"""
 import json
 import requests
+
 from .base import EvohomeBase, EvohomeClientInvalidPostData
 
 
@@ -10,7 +11,7 @@ class ZoneBase(EvohomeBase):
     def __init__(self):
         super(ZoneBase, self).__init__()
         self.name = ""
-        self.zoneId = ""  # pylint: disable=invalid-name
+        self.zoneId = ""                                                         # pylint: disable=invalid-name
         self.zone_type = ""
 
     def schedule(self):
@@ -18,7 +19,7 @@ class ZoneBase(EvohomeBase):
         response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' %
                                 (self.zone_type, self.zoneId), headers=self.client._headers())  # pylint: disable=no-member,protected-access
 
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
         mapping = [
@@ -55,7 +56,7 @@ class ZoneBase(EvohomeBase):
         response = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' %
                                 (self.zone_type, self.zoneId), data=zone_info, headers=headers)
 
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
         return self._convert(response.text)
@@ -89,7 +90,7 @@ class Zone(ZoneBase):
         headers['Content-Type'] = 'application/json'
         response = requests.put(url, json.dumps(data), headers=headers)
 
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             response.raise_for_status()
 
     def cancel_temp_override(self):
