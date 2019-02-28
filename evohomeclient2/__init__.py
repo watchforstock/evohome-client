@@ -4,6 +4,7 @@
    """
 from __future__ import print_function
 from datetime import datetime, timedelta
+import logging
 import requests
 
 from .location import Location
