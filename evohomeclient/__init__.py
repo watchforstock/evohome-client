@@ -35,7 +35,8 @@ class EvohomeClient:
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
 
-    def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
+    def __init__(self, username, password, debug=False, user_data=None,
+                 hostname="https://tccna.honeywell.com"):
         """Constructor. Takes the username and password for the service.
 
         If user_data is given then this will be used to try and reduce
