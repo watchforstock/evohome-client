@@ -2,8 +2,10 @@
 import json
 import codecs
 import logging
+
 logging.basicConfig()
-REQUESTS_LOG = logging.getLogger("requests.packages.urllib3")
+_LOGGER = logging.getLogger(__name__)
+REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 try:
     import http.client as http_client
@@ -22,16 +24,14 @@ class EvohomeBase(object):  # pylint: disable=too-few-public-methods
     def __init__(self, debug=False):
         self.reader = codecs.getdecoder("utf-8")
 
-        if debug:
+        if debug is True:
+            _LOGGER.setLevel(logging.DEBUG)
+            _LOGGER.debug("__init__(): Debug mode is explicitly enabled.")
+            REQUESTS_LOGGER.setLevel(logging.DEBUG)
+            REQUESTS_LOGGER.propagate = True
             http_client.HTTPConnection.debuglevel = 1
-            logging.getLogger(__name__).setLevel(logging.DEBUG)
-            REQUESTS_LOG.setLevel(logging.DEBUG)
-            REQUESTS_LOG.propagate = True
         else:
-            http_client.HTTPConnection.debuglevel = 0
-            logging.getLogger(__name__).setLevel(logging.INFO)
-            REQUESTS_LOG.setLevel(logging.INFO)
-            REQUESTS_LOG.propagate = False
+            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
     def _convert(self, obj):  # pylint: disable=no-self-use
         return json.loads(obj)
