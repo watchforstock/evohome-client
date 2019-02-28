@@ -1,4 +1,7 @@
-"""Provides a client for the updated Evohome API"""
+"""evohomeclient2 provides a client for the updated Evohome API.
+
+   Further information at: https://evohome-client.readthedocs.io
+   """
 from __future__ import print_function
 from datetime import datetime, timedelta
 import requests

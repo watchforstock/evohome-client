@@ -1,4 +1,7 @@
-"""evohomeclient is based on the original API for access to Evohome data"""
+"""evohomeclient2 provides a client for the oiginal Evohome API.
+
+   Further information at: https://evohome-client.readthedocs.io
+   """
 from __future__ import print_function
 
 import codecs
@@ -9,7 +12,8 @@ import sys
 import requests
 
 logging.basicConfig()
-REQUESTS_LOG = logging.getLogger("requests.packages.urllib3")
+_LOGGER = logging.getLogger(__name__)
+REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 try:
     import http.client as http_client
@@ -31,7 +35,8 @@ class EvohomeClient:
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
 
-    def __init__(self, username, password, debug=False, user_data=None, hostname="https://tccna.honeywell.com"):
+    def __init__(self, username, password, debug=False, user_data=None,
+                 hostname="https://tccna.honeywell.com"):
         """Constructor. Takes the username and password for the service.
 
         If user_data is given then this will be used to try and reduce
@@ -53,15 +58,13 @@ class EvohomeClient:
         self.headers = {}
 
         if debug is True:
+            _LOGGER.setLevel(logging.DEBUG)
+            _LOGGER.debug("__init__(): Debug mode is explicitly enabled.")
+            REQUESTS_LOGGER.setLevel(logging.DEBUG)
+            REQUESTS_LOGGER.propagate = True
             http_client.HTTPConnection.debuglevel = 1
-            logging.getLogger(__name__).setLevel(logging.DEBUG)
-            REQUESTS_LOG.setLevel(logging.DEBUG)
-            REQUESTS_LOG.propagate = True
         else:
-            http_client.HTTPConnection.debuglevel = 0
-            logging.getLogger(__name__).setLevel(logging.INFO)
-            REQUESTS_LOG.setLevel(logging.INFO)
-            REQUESTS_LOG.propagate = False
+            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
     def _convert(self, content):
         return json.loads(self.reader(content)[0])
