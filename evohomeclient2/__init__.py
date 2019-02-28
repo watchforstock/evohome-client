@@ -24,7 +24,7 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attributes
+class EvohomeClient(EvohomeBase):                                                # pylint: disable=too-many-instance-attributes
     """Provides access to the Evohome API"""
 
     # pylint: disable=too-many-arguments
@@ -35,9 +35,9 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         self.username = username
         self.password = password
 
-        self.refresh_token = refresh_token
-        self.access_token = access_token
-        self.access_token_expires = access_token_expires
+        self._refresh_token = refresh_token
+        self._access_token = access_token
+        self._access_token_expires = access_token_expires
 
         self.account_info = None
         self.locations = None
@@ -46,6 +46,30 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
 
         self._login()
 
+    @property
+    def refresh_token(self):                                                     # pylint: disable=missing-docstring
+        return self._refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, value):
+        self._refresh_token = value
+
+    @property
+    def access_token(self):                                                      # pylint: disable=missing-docstring
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, value):
+        self._access_token = value
+
+    @property
+    def access_token_expires(self):                                              # pylint: disable=missing-docstring
+        return self._access_token_expires
+
+    @access_token_expires.setter
+    def access_token_expires(self, value):
+        self._access_token_expires = value
+
     def _login(self):
         self.user_account()
         self.installation()
@@ -53,14 +77,14 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
     def _headers(self):
         """Ensure the Authorization Header has a valid Access Token."""
 
-        if self.access_token is None or self.access_token_expires is None:
+        if self._access_token is None or self._access_token_expires is None:
             self._basic_login()
 
-        elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
+        elif datetime.now() > self._access_token_expires - timedelta(seconds=30):
             self._basic_login()
 
         return {'Accept': HEADER_ACCEPT,
-                'Authorization': 'bearer ' + self.access_token}
+                'Authorization': 'bearer ' + self._access_token}
 
     def _basic_login(self):
         """Obtain a (new) access token from the vendor.
@@ -68,7 +92,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials."""
 
-        self.access_token = self.access_token_expires = None
+        self._access_token = self._access_token_expires = None
 
         if self.refresh_token is not None:
             credentials = {'grant_type': "refresh_token",
@@ -119,8 +143,8 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
             response_json = response.json()  # this may cause a ValueError
 
             # these may cause a KeyError
-            self.access_token = response_json['access_token']
-            self.access_token_expires = (
+            self._access_token = response_json['access_token']
+            self._access_token_expires = (
                 datetime.now() + timedelta(seconds=response_json['expires_in']))
             self.refresh_token = response_json['refresh_token']
 
@@ -148,13 +172,13 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         else:
             raise Exception("More than one location available")
 
-        if len(location._gateways) == 1:  # pylint: disable=protected-access
-            gateway = location._gateways[0]  # pylint: disable=protected-access
+        if len(location._gateways) == 1:                                         # pylint: disable=protected-access
+            gateway = location._gateways[0]                                      # pylint: disable=protected-access
         else:
             raise Exception("More than one gateway available")
 
-        if len(gateway._control_systems) == 1:  # pylint: disable=protected-access
-            control_system = gateway._control_systems[0]  # pylint: disable=protected-access
+        if len(gateway._control_systems) == 1:                                   # pylint: disable=protected-access
+            control_system = gateway._control_systems[0]                         # pylint: disable=protected-access
         else:
             raise Exception("More than one control system available")
 
