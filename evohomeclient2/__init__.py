@@ -66,20 +66,23 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         """Obtain a (new) access token from the vendor.
 
         First, try using the refresh_token, if one is available, otherwise
-        authenticate using the user credentials."""
-
+        authenticate using the user credentials.
+        """
         self.access_token = self.access_token_expires = None
 
         if self.refresh_token is not None:
+            _LOGGER.debug("_basic_login(): Trying refresh_token...")
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
             if not self._obtain_access_token(credentials):
                 # invalid refresh_token, silently try username/password instead
+                _LOGGER.warn("_basic_login(): Invalid refresh_token.")
                 self.refresh_token = None
 
         if self.refresh_token is None:
+            _LOGGER.debug("_basic_login(): Trying user credentials...")
             credentials = {'grant_type': "password",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account",
                            'Username': self.username,
@@ -91,8 +94,8 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
     def _obtain_access_token(self, credentials):
         """Get an access token using the supplied credentials.
 
-        Return False if this is not possible."""
-
+        Return False if this is not possible.
+        """
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         payload = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -161,7 +164,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return control_system
 
     def user_account(self):
-        """Gets user account information"""
+        """Returns the user account information."""
         self.account_info = None
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
@@ -173,7 +176,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return self.account_info
 
     def installation(self):
-        """Returns details of the installation"""
+        """Return the details of the installation."""
         self.locations = []
 
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
@@ -193,7 +196,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return self.installation_info
 
     def full_installation(self, location=None):
-        """Retrieves full details of the installation"""
+        """Retrieves full details of the installation."""
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
@@ -204,7 +207,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def gateway(self):
-        """Retrieves details of the gateway"""
+        """Retrieves the detail of the gateway."""
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
         response = requests.get(url, headers=self._headers())
@@ -213,41 +216,41 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def set_status_normal(self):
-        """Sets the system into normal heating mode"""
+        """Sets the system into normal heating mode."""
         return self._get_single_heating_system().set_status_normal()
 
     def set_status_reset(self):
-        """Resets the system mode"""
+        """Resets the system mode."""
         return self._get_single_heating_system().set_status_reset()
 
     def set_status_custom(self, until=None):
-        """Sets the system into custom heating mode"""
+        """Sets the system into custom heating mode."""
         return self._get_single_heating_system().set_status_custom(until)
 
     def set_status_eco(self, until=None):
-        """Sets the system into eco heating mode"""
+        """Sets the system into eco heating mode."""
         return self._get_single_heating_system().set_status_eco(until)
 
     def set_status_away(self, until=None):
-        """Sets the system into away heating mode"""
+        """Sets the system into away heating mode."""
         return self._get_single_heating_system().set_status_away(until)
 
     def set_status_dayoff(self, until=None):
-        """Sets the system into day off heating mode"""
+        """Sets the system into day off heating mode."""
         return self._get_single_heating_system().set_status_dayoff(until)
 
     def set_status_heatingoff(self, until=None):
-        """Sets the system into heating off heating mode"""
+        """Sets the system into heating off heating mode."""
         return self._get_single_heating_system().set_status_heatingoff(until)
 
     def temperatures(self):
-        """Returns the current zone temperatures and set points"""
+        """Returns the current zone temperatures and set points."""
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
-        """Backs up the current system configuration to the given file"""
+        """Backs up the current system configuration to the given file."""
         return self._get_single_heating_system().zone_schedules_backup(filename)
 
     def zone_schedules_restore(self, filename):
-        """Restores the current system configuration from the given file"""
+        """Restores the current system configuration from the given file."""
         return self._get_single_heating_system().zone_schedules_restore(filename)
