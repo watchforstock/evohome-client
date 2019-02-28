@@ -6,14 +6,18 @@ from .zone import ZoneBase
 
 
 class HotWater(ZoneBase):
-    """Provides handling of the hot water zone"""
+    """Provides handling of the hot water zone."""
 
     def __init__(self, client, data):
-        self.dhwId = None                                                        # pylint: disable=invalid-name
-        self.zone_type = 'domesticHotWater'
-
         super(HotWater, self).__init__(client, data)
 
+        self.name = ""
+        self.dhwId = None                                                        # pylint: disable=invalid-name
+        self.zone_type = None
+
+        self.__dict__.update(data)
+
+        self.zone_type = 'domesticHotWater'
         self.zoneId = self.dhwId
 
     def _set_dhw(self, data):

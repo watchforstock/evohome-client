@@ -12,12 +12,10 @@ class ZoneBase(object):
 
     def __init__(self, client, data=None):
         self.client = client
-
-        self.name = None
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
+
         print(data)
-        self.__dict__.update(data)
 
     def schedule(self):
         """Gets the schedule for the given zone"""
@@ -65,12 +63,18 @@ class ZoneBase(object):
 
 
 class Zone(ZoneBase):
-    """Provides the access to an individual zone"""
+    """Provides the access to an individual zone."""
 
     def __init__(self, client, data):
-        self.zone_type = 'temperatureZone'
-
         super(Zone, self).__init__(client, data)
+
+        self.name = None
+        self.zoneId = None                                                       # pylint: disable=invalid-name
+        self.zone_type = None
+
+        self.__dict__.update(data)
+
+        self.zone_type = 'temperatureZone'
 
     def set_temperature(self, temperature, until=None):
         """Sets the temperature of the given zone"""
