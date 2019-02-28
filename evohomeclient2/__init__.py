@@ -164,7 +164,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return control_system
 
     def user_account(self):
-        """Returns the user account information."""
+        """Return the user account information."""
         self.account_info = None
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
@@ -196,7 +196,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return self.installation_info
 
     def full_installation(self, location=None):
-        """Retrieves full details of the installation."""
+        """Return the full details of the installation."""
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
@@ -207,7 +207,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def gateway(self):
-        """Retrieves the detail of the gateway."""
+        """Return the detail of the gateway."""
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
         response = requests.get(url, headers=self._headers())
@@ -216,41 +216,41 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def set_status_normal(self):
-        """Sets the system into normal heating mode."""
+        """Set the system into normal heating mode."""
         return self._get_single_heating_system().set_status_normal()
 
     def set_status_reset(self):
-        """Resets the system mode."""
+        """Reset the system mode."""
         return self._get_single_heating_system().set_status_reset()
 
     def set_status_custom(self, until=None):
-        """Sets the system into custom heating mode."""
+        """Set the system into custom heating mode."""
         return self._get_single_heating_system().set_status_custom(until)
 
     def set_status_eco(self, until=None):
-        """Sets the system into eco heating mode."""
+        """Set the system into eco heating mode."""
         return self._get_single_heating_system().set_status_eco(until)
 
     def set_status_away(self, until=None):
-        """Sets the system into away heating mode."""
+        """Set the system into away heating mode."""
         return self._get_single_heating_system().set_status_away(until)
 
     def set_status_dayoff(self, until=None):
-        """Sets the system into day off heating mode."""
+        """Set the system into day off heating mode."""
         return self._get_single_heating_system().set_status_dayoff(until)
 
     def set_status_heatingoff(self, until=None):
-        """Sets the system into heating off heating mode."""
+        """Set the system into heating off heating mode."""
         return self._get_single_heating_system().set_status_heatingoff(until)
 
     def temperatures(self):
-        """Returns the current zone temperatures and set points."""
+        """Return the current zone temperatures and set points."""
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
-        """Backs up the current system configuration to the given file."""
+        """Back up the current system configuration to the given file."""
         return self._get_single_heating_system().zone_schedules_backup(filename)
 
     def zone_schedules_restore(self, filename):
-        """Restores the current system configuration from the given file."""
+        """Restore the current system configuration from the given file."""
         return self._get_single_heating_system().zone_schedules_restore(filename)
