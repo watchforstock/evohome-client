@@ -16,7 +16,7 @@ class ZoneBase(object):
         self.name = None
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
-
+        print(data)
         self.__dict__.update(data)
 
     def schedule(self):
