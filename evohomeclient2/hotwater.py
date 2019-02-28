@@ -9,11 +9,10 @@ class HotWater(ZoneBase):
     """Provides handling of the hot water zone"""
 
     def __init__(self, client, data=None):
-        super(HotWater, self).__init__()
-        self.client = client
+        super(HotWater, self).__init__(client, data)
+
         self.zone_type = 'domesticHotWater'
         if data is not None:
-            self.__dict__.update(data)
             self.zoneId = self.dhwId                                             # pylint: disable=no-member
 
     def _set_dhw(self, data):
@@ -23,8 +22,7 @@ class HotWater(ZoneBase):
 
         response = requests.put(url, data=json.dumps(data), headers=headers)
 
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
     def set_dhw_on(self, until=None):
         """Sets the DHW on until a given time, or permanantly"""

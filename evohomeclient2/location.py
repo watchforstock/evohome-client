@@ -1,19 +1,20 @@
 """Provides handling of a location"""
 import requests
+
 from .gateway import Gateway
 
-from .base import EvohomeBase
 
-
-class Location(EvohomeBase):                                                     # pylint: disable=too-few-public-methods
+class Location(object):                                                     # pylint: disable=too-few-public-methods
     """Provides handling of a location"""
 
     def __init__(self, client, data=None):
         super(Location, self).__init__()
+
         self.client = client
         self._gateways = []
         self.gateways = {}
         self.locationId = None                                                   # pylint: disable=invalid-name
+
         if data is not None:
             self.__dict__.update(data['locationInfo'])
 
@@ -29,11 +30,9 @@ class Location(EvohomeBase):                                                    
                                 self.locationId,
                                 headers=self.client._headers())                  # pylint: disable=protected-access
 
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
-        # pylint: disable=protected-access
-        data = self.client._convert(response.text)
+        data = response.json()
 
         # Now feed into other elements
         for gw_data in data['gateways']:

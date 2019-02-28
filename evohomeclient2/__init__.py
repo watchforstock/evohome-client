@@ -7,11 +7,17 @@ from datetime import datetime, timedelta
 import logging
 import requests
 
+try:
+    import http.client as http_client
+except ImportError:
+    # Python 2
+    import httplib as http_client
+
 from .location import Location
-from .base import EvohomeBase
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
+REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 HEADER_ACCEPT = (
     "application/json, application/xml, text/json, text/x-json, "
@@ -28,14 +34,20 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(EvohomeBase):                                                # pylint: disable=too-many-instance-attributes
+class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes
     """Provides access to the Evohome API."""
 
     def __init__(self, username, password, debug=False, refresh_token=None,
                  access_token=None, access_token_expires=None):                  # pylint: disable=too-many-arguments
-        super(EvohomeClient, self).__init__(debug)
+        super(EvohomeClient, self).__init__()
 
-        if debug is not True:
+        if debug is True:
+            _LOGGER.setLevel(logging.DEBUG)
+            _LOGGER.debug("__init__(): Debug mode is explicitly enabled.")
+            REQUESTS_LOGGER.setLevel(logging.DEBUG)
+            REQUESTS_LOGGER.propagate = True
+            http_client.HTTPConnection.debuglevel = 1
+        else:
             _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
         self.username = username

@@ -2,7 +2,7 @@
 from .controlsystem import ControlSystem
 
 
-class Gateway(object):  # pylint: disable=too-few-public-methods
+class Gateway(object):                                                           # pylint: disable=too-few-public-methods
     """Provides handling of a gateway"""
 
     def __init__(self, client, location, data=None):
@@ -10,6 +10,7 @@ class Gateway(object):  # pylint: disable=too-few-public-methods
         self.location = location
         self._control_systems = []
         self.control_systems = {}
+
         if data is not None:
             self.__dict__.update(data['gatewayInfo'])
 

@@ -5,24 +5,23 @@ import requests
 
 from .zone import Zone
 from .hotwater import HotWater
-from .base import EvohomeBase
 
 
-class ControlSystem(EvohomeBase):
+class ControlSystem(object):
     """Provides handling of a control system"""
 
     def __init__(self, client, location, gateway, data=None):
         super(ControlSystem, self).__init__()
+
         self.client = client
         self.location = location
         self.gateway = gateway
+
         self._zones = []
-        self.zones = {}
-        self.zones_by_id = {}
+        self.zones = self.zones_by_id = {}
         self.hotwater = None
 
         if data is not None:
-
             local_data = dict(data)
             del local_data['zones']
 
@@ -39,8 +38,7 @@ class ControlSystem(EvohomeBase):
 
     def _set_status(self, mode, until=None):
 
-        # pylint: disable=no-member,protected-access
-        headers = dict(self.client._headers())
+        headers = dict(self.client._headers())                                   # pylint: disable=no-member,protected-access
         headers['Content-Type'] = 'application/json'
 
         if until is None:
@@ -55,8 +53,7 @@ class ControlSystem(EvohomeBase):
         response = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/%s/mode' %
                                 self.systemId, data=json.dumps(data), headers=headers)  # pylint: disable=no-member
 
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            response.raise_for_status()
+        response.raise_for_status()
 
     def set_status_normal(self):
         """Sets the system into normal mode"""
@@ -101,6 +98,7 @@ class ControlSystem(EvohomeBase):
                          'name': zone.name,
                          'temp': None,
                          'setpoint': zone.setpointStatus['targetHeatTemperature']}
+
             if zone.temperatureStatus['isAvailable']:
                 zone_info['temp'] = zone.temperatureStatus['temperature']
             yield zone_info
