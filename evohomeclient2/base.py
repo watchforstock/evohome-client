@@ -30,8 +30,6 @@ class EvohomeBase(object):  # pylint: disable=too-few-public-methods
             REQUESTS_LOGGER.setLevel(logging.DEBUG)
             REQUESTS_LOGGER.propagate = True
             http_client.HTTPConnection.debuglevel = 1
-        else:
-            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
     def _convert(self, obj):  # pylint: disable=no-self-use
         return json.loads(obj)

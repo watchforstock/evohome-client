@@ -29,12 +29,15 @@ HEADER_BASIC_AUTH = {
 
 
 class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attributes
-    """Provides access to the Evohome API"""
+    """Provides access to the Evohome API."""
 
     # pylint: disable=too-many-arguments
     def __init__(self, username, password, debug=False, refresh_token=None,
                  access_token=None, access_token_expires=None):
         super(EvohomeClient, self).__init__(debug)
+
+        if debug is not True:
+            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
         self.username = username
         self.password = password
