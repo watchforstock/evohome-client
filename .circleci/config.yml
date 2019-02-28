@@ -81,15 +81,21 @@ workflows:
             - build
   deploy:
     jobs:
-      - build
+      - build:
+          filters:  # required since `deploy` has tag filters AND requires `build`
+            tags:
+              only: /.*/
       - test:
           requires:
             - build
+          filters:  # required since `deploy` has tag filters AND requires `build`
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
-         # filters:
-          #  tags:
-           #   only: /[0-9]+(\.[0-9]+)*/
-           # branches:
-           #   ignore: /.*/
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore: /.*/
