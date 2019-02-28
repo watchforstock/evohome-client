@@ -72,7 +72,6 @@ class Zone(ZoneBase):
 
         super(Zone, self).__init__(client, data)
 
-
     def set_temperature(self, temperature, until=None):
         """Sets the temperature of the given zone"""
         if until is None:
