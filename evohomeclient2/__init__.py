@@ -9,6 +9,9 @@ import requests
 from .location import Location
 from .base import EvohomeBase
 
+logging.basicConfig()
+_LOGGER = logging.getLogger(__name__)
+
 HEADER_ACCEPT = (
     "application/json, application/xml, text/json, text/x-json, "
     "text/javascript, text/xml"
