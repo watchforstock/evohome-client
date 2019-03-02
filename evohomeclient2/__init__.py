@@ -71,7 +71,7 @@ class EvohomeClient(object):                                                    
     def _headers(self):
         """Ensure the Authorization Header has a valid Access Token."""
 
-        if self.access_token is None or self.access_token_expires is None:
+        if not self.access_token or not self.access_token_expires:
             self._basic_login()
 
         elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
@@ -88,7 +88,7 @@ class EvohomeClient(object):                                                    
         """
         self.access_token = self.access_token_expires = None
 
-        if self.refresh_token is not None:
+        if self.refresh_token:
             _LOGGER.debug("_basic_login(): Trying refresh_token...")
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
