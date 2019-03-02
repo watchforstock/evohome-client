@@ -39,7 +39,6 @@ class EvohomeClient(object):                                                    
 
     def __init__(self, username, password, debug=False, refresh_token=None,
                  access_token=None, access_token_expires=None):                  # pylint: disable=too-many-arguments
-        super(EvohomeClient, self).__init__()
 
         if debug is True:
             _LOGGER.setLevel(logging.DEBUG)

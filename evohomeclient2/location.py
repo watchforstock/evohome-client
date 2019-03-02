@@ -4,12 +4,10 @@ import requests
 from .gateway import Gateway
 
 
-class Location(object):                                                     # pylint: disable=too-few-public-methods
+class Location(object):                                                          # pylint: disable=too-few-public-methods
     """Provides handling of a location"""
 
     def __init__(self, client, data=None):
-        super(Location, self).__init__()
-
         self.client = client
         self._gateways = []
         self.gateways = {}
@@ -26,9 +24,12 @@ class Location(object):                                                     # py
 
     def status(self):
         """Retrieves the location status"""
-        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' %
-                                self.locationId,
-                                headers=self.client._headers())                  # pylint: disable=protected-access
+        response = requests.get(
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
+            "location/%s/status?includeTemperatureControlSystems=True" %
+            self.locationId,
+            headers=self.client._headers()
+        )                                                                        # pylint: disable=protected-access
 
         response.raise_for_status()
 
