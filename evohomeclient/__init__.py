@@ -80,10 +80,7 @@ class EvohomeClient:
                    "?userId=%s&allData=True" % user_id)
             self.headers['sessionId'] = session_id
 
-            response = requests.get(url,
-                                    data=json.dumps(self.postdata),
-                                    headers=self.headers)
-            response.raise_for_status()
+            response = self._do_request('get', url, json.dumps(self.postdata))
 
             self.full_data = self._convert(response.content)[0]
 
@@ -102,8 +99,7 @@ class EvohomeClient:
             url = (self.hostname + "/WebAPI/api/gateways"
                    "?locationId=%s&allData=False" % self.location_id)
 
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
+            response = self._do_request('get', url)
 
             self.gateway_data = self._convert(response.content)[0]
 
@@ -115,9 +111,8 @@ class EvohomeClient:
                              'ApplicationId': '91db1612-73fd-4500-91b2-e63b069b185c'}
             self.headers = {'content-type': 'application/json'}
 
-            response = requests.post(url,
-                                     data=json.dumps(self.postdata),
-                                     headers=self.headers)
+            response = self._do_request(
+                'post', url, data=json.dumps(self.postdata), retry=False)
 
             # catch 429/too_many_requests first, for a consistent experience
             if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
@@ -165,8 +160,7 @@ class EvohomeClient:
         url = (self.hostname + "/WebAPI/api/commTasks"
                "?commTaskId=%s" % task_id)
 
-        response = requests.get(url, headers=self.headers)
-        response.raise_for_status()
+        response = self._do_request('get', url)
 
         return self._convert(response.content)['state']
 
@@ -178,6 +172,22 @@ class EvohomeClient:
         else:
             task_id = ret['id']
         return task_id
+
+    def _do_request(self, method, url, data=None, retry=True):
+        if method == 'get':
+            func = requests.get
+        elif method == 'put':
+            func = requests.put
+        elif method == 'post':
+            func = requests.post
+        response = func(url, data=data, headers=self.headers)
+        if response.status_code == requests.codes.unauthorized and retry:  # pylint: disable=no-member
+            # Attempt to refresh session id if request was unauthorised
+            self.user_data = None
+            self._populate_user_info()
+            response = func(url, data=data, headers=self.headers)
+        response.raise_for_status()
+        return response
 
     def _set_status(self, status, until=None):
         self._populate_full_data()
@@ -192,10 +202,7 @@ class EvohomeClient:
                 "QuickActionNextTime": "%sT00:00:00Z" % until.strftime('%Y-%m-%d')
             }
 
-        response = requests.put(url,
-                                data=json.dumps(data),
-                                headers=self.headers)
-        response.raise_for_status()
+        response = self._do_request('put', url, json.dumps(data))
 
         task_id = self._get_task_id(response)
 
@@ -238,8 +245,7 @@ class EvohomeClient:
         url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues/heatSetpoint" % device_id)
 
-        response = requests.put(url, json.dumps(data), headers=self.headers)
-        response.raise_for_status()
+        response = self._do_request('put', url, json.dumps(data))
 
         task_id = self._get_task_id(response)
 
@@ -282,10 +288,7 @@ class EvohomeClient:
         url = (self.hostname + "/WebAPI/api/devices"
                "/%s/thermostat/changeableValues" % self._get_dhw_zone())
 
-        response = requests.put(url,
-                                data=json.dumps(data),
-                                headers=self.headers)
-        response.raise_for_status()
+        response = self._do_request('put', url, json.dumps(data))
 
         task_id = self._get_task_id(response)
 
