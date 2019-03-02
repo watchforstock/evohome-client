@@ -2,7 +2,7 @@
 from .controlsystem import ControlSystem
 
 
-class Gateway(object):                                                           # pylint: disable=too-few-public-methods
+class Gateway(object):                                                           # pylint: disable=too-few-public-methods,useless-object-inheritance
     """Provides handling of a gateway"""
 
     def __init__(self, client, location, data=None):

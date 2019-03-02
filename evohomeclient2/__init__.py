@@ -17,7 +17,6 @@ from .location import Location
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
-REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 HEADER_ACCEPT = (
     "application/json, application/xml, text/json, text/x-json, "
@@ -34,7 +33,7 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes
+class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes,useless-object-inheritance
     """Provides access to the Evohome API."""
 
     def __init__(self, username, password, debug=False, refresh_token=None,
@@ -42,12 +41,18 @@ class EvohomeClient(object):                                                    
 
         if debug is True:
             _LOGGER.setLevel(logging.DEBUG)
-            _LOGGER.debug("__init__(): Debug mode is explicitly enabled.")
-            REQUESTS_LOGGER.setLevel(logging.DEBUG)
-            REQUESTS_LOGGER.propagate = True
+            _LOGGER.debug("Debug mode is explicitly enabled.")
+
+            requests_logger = logging.getLogger("requests.packages.urllib3")
+            requests_logger.setLevel(logging.DEBUG)
+            requests_logger.propagate = True
+
             http_client.HTTPConnection.debuglevel = 1
         else:
-            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
+            _LOGGER.debug(
+                "Debug mode is not explicitly enabled "
+                "(but may be enabled elsewhere)."
+            )
 
         self.username = username
         self.password = password
@@ -88,18 +93,18 @@ class EvohomeClient(object):                                                    
         self.access_token = self.access_token_expires = None
 
         if self.refresh_token:
-            _LOGGER.debug("_basic_login(): Trying refresh_token...")
+            _LOGGER.debug("Trying refresh_token...")
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
             if not self._obtain_access_token(credentials):
                 # invalid refresh_token, silently try username/password instead
-                _LOGGER.warn("_basic_login(): Invalid refresh_token.")
+                _LOGGER.warning("Invalid refresh_token.")
                 self.refresh_token = None
 
         if not self.refresh_token:
-            _LOGGER.debug("_basic_login(): Trying user credentials...")
+            _LOGGER.debug("Trying user credentials...")
             credentials = {'grant_type': "password",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account",
                            'Username': self.username,
@@ -151,10 +156,7 @@ class EvohomeClient(object):                                                    
         except ValueError as error:
             raise ValueError("Unable to obtain an Access Token: ", error)
 
-        _LOGGER.debug(
-            "_obtain_access_token(): New refresh_token = ",
-            self.refresh_token
-        )
+        _LOGGER.debug("New refresh_token = %s", self.refresh_token)
 
         return True
 

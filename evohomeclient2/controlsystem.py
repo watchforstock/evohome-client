@@ -7,7 +7,7 @@ from .zone import Zone
 from .hotwater import HotWater
 
 
-class ControlSystem(object):
+class ControlSystem(object):                                                     # pylint: disable=useless-object-inheritance
     """Provides handling of a control system"""
 
     def __init__(self, client, location, gateway, data=None):
@@ -18,6 +18,8 @@ class ControlSystem(object):
         self._zones = []
         self.zones = self.zones_by_id = {}
         self.hotwater = None
+# TODO: is systemId set via self.__dict__.update(local_data)?
+        self.systemId = None                                                     # pylint: disable=invalid-name
 
         if data is not None:
             local_data = dict(data)

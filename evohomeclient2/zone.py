@@ -3,7 +3,7 @@ import json
 import requests
 
 
-class ZoneBase(object):
+class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
     """Provides the base for Zones"""
 
     def __init__(self, client, data=None):
@@ -18,8 +18,8 @@ class ZoneBase(object):
         response = requests.get(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/%s/%s/schedule" % (self.zone_type, self.zoneId),
-            headers=self.client._headers()
-        )                                                                        # pylint: disable=no-member,protected-access
+            headers=self.client._headers()                                       # pylint: disable=no-member,protected-access
+        )
         response.raise_for_status()
 
         mapping = [
