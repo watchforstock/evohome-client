@@ -99,7 +99,7 @@ class EvohomeClient(object):                                                    
                 _LOGGER.warn("_basic_login(): Invalid refresh_token.")
                 self.refresh_token = None
 
-        if self.refresh_token is None:
+        if not self.refresh_token:
             _LOGGER.debug("_basic_login(): Trying user credentials...")
             credentials = {'grant_type': "password",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account",
@@ -137,7 +137,8 @@ class EvohomeClient(object):                                                    
         response.raise_for_status()
 
         try:  # validate the access token
-            response_json = response.json()  # this may cause a ValueError
+            # this may cause a ValueError
+            response_json = response.json()
 
             # these may cause a KeyError
             self.access_token = response_json['access_token']
@@ -146,7 +147,7 @@ class EvohomeClient(object):                                                    
             self.refresh_token = response_json['refresh_token']
 
         except KeyError as error:
-            raise KeyError("Unable to obtain an Access Token: ", error)
+            raise KeyError("Unable to obtain an Access Token: ", response_json)
 
         except ValueError as error:
             raise ValueError("Unable to obtain an Access Token: ", error)
@@ -160,26 +161,16 @@ class EvohomeClient(object):                                                    
 
     def _get_single_heating_system(self):
         # This allows a shortcut for some systems
-        location = None
-        gateway = None
-        control_system = None
+        if len(self.locations) != 1:
+            raise Exception("More (or less) than one location available")
 
-        if len(self.locations) == 1:
-            location = self.locations[0]
-        else:
-            raise Exception("More than one location available")
+        if len(self.locations[0]._gateways) != 1:                                # pylint: disable=protected-access
+            raise Exception("More (or less) than one gateway available")
 
-        if len(location._gateways) == 1:                                         # pylint: disable=protected-access
-            gateway = location._gateways[0]                                      # pylint: disable=protected-access
-        else:
-            raise Exception("More than one gateway available")
+        if len(self.locations[0]._gateways[0]._control_systems) != 1:            # pylint: disable=protected-access
+            raise Exception("More (or less) than one control system available")
 
-        if len(gateway._control_systems) == 1:                                   # pylint: disable=protected-access
-            control_system = gateway._control_systems[0]                         # pylint: disable=protected-access
-        else:
-            raise Exception("More than one control system available")
-
-        return control_system
+        return self.locations[0]._gateways[0]._control_systems[0]                # pylint: disable=protected-access
 
     def user_account(self):
         """Return the user account information."""
