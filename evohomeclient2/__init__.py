@@ -152,6 +152,11 @@ class EvohomeClient(object):                                                    
         except ValueError as error:
             raise ValueError("Unable to obtain an Access Token: ", error)
 
+        _LOGGER.debug(
+            "_obtain_access_token(): New refresh_token = ",
+            self.refresh_token
+        )
+
         return True
 
     def _get_location(self, location):
