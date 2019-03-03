@@ -9,7 +9,7 @@ class HotWater(ZoneBase):
     """Provides handling of the hot water zone."""
 
     def __init__(self, client, data):
-        super(HotWater, self).__init__(client, data)
+        super(HotWater, self).__init__(client)
 
         self.name = ""
         self.dhwId = None                                                        # pylint: disable=invalid-name

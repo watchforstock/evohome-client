@@ -6,7 +6,7 @@ import requests
 class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
     """Provides the base for Zones"""
 
-    def __init__(self, client, data=None):
+    def __init__(self, client):
         self.client = client
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
@@ -65,7 +65,7 @@ class Zone(ZoneBase):
     """Provides the access to an individual zone."""
 
     def __init__(self, client, data):
-        super(Zone, self).__init__(client, data)
+        super(Zone, self).__init__(client)
 
         self.name = None
         self.zoneId = None                                                       # pylint: disable=invalid-name
