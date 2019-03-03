@@ -114,16 +114,6 @@ class EvohomeClient:
             response = self._do_request(
                 'post', url, data=json.dumps(self.postdata), retry=False)
 
-            # catch 429/too_many_requests first, for a consistent experience
-            if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
-                response.raise_for_status()
-            if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
-                if 'code' in response.text:  # don't use response.json()!
-                    message = ("HTTP Status = " + str(response.status_code) +
-                               ", Response = " + response.text)
-                    raise requests.HTTPError(message)
-                response.raise_for_status()
-
             self.user_data = self._convert(response.content)
 
         return self.user_data
@@ -183,10 +173,25 @@ class EvohomeClient:
         response = func(url, data=data, headers=self.headers)
         if response.status_code == requests.codes.unauthorized and retry:  # pylint: disable=no-member
             # Attempt to refresh session id if request was unauthorised
-            self.user_data = None
-            self._populate_user_info()
-            response = func(url, data=data, headers=self.headers)
-        response.raise_for_status()
+            if 'Unauthorized' in response.text:
+                self.user_data = None
+                self._populate_user_info()
+                # Set sessionID in headers
+                session_id = self.user_data['sessionId']
+                self.headers['sessionId'] = session_id
+
+                response = func(url, data=data, headers=self.headers)
+
+        # catch 429/too_many_requests first, for a consistent experience
+        if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
+            response.raise_for_status()
+        if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
+            if 'code' in response.text:  # don't use response.json()!
+                message = ("HTTP Status = " + str(response.status_code) +
+                            ", Response = " + response.text)
+                raise requests.HTTPError(message)
+            response.raise_for_status()
+
         return response
 
     def _set_status(self, status, until=None):
