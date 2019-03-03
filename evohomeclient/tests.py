@@ -213,4 +213,5 @@ def test_valid_login(mock):
 
     assert len(data) == 2
     # assert x[1].name == "RoomName"
-    assert data == [{'thermostat': 'DOMESTIC_HOT_WATER', 'id': 131313, 'name': '', 'temp': 24.01, 'setpoint': 0}, {'thermostat': 'EMEA_ZONE', 'id': 121212, 'name': 'RoomName', 'temp': 17.54, 'setpoint': 15.0}]
+
+    assert data == [{'thermostat': 'DOMESTIC_HOT_WATER', 'id': 131313, 'name': '', 'temp': 24.01, 'setpoint': 0, 'status': 'Scheduled', 'mode': 'DHWOff'}, {'thermostat': 'EMEA_ZONE', 'id': 121212, 'name': 'RoomName', 'temp': 17.54, 'setpoint': 15.0, 'status': 'Scheduled', 'mode': 'Off'}]
