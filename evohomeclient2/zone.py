@@ -11,8 +11,6 @@ class ZoneBase(object):                                                         
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
 
-        print(data)
-
     def schedule(self):
         """Gets the schedule for the given zone"""
         response = requests.get(

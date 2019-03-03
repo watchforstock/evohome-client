@@ -13,7 +13,6 @@ class Location(object):                                                         
         self.gateways = {}
         self.locationId = None                                                   # pylint: disable=invalid-name
 
-        print("ZX A")
         if data is not None:
             self.__dict__.update(data['locationInfo'])
 
@@ -22,9 +21,7 @@ class Location(object):                                                         
                 self._gateways.append(gateway)
                 self.gateways[gateway.gatewayId] = gateway                       # pylint: disable=no-member
 
-            print("ZX B")
             self.status()
-        print("ZX C")
 
     def status(self):
         """Retrieves the location status."""
@@ -34,11 +31,9 @@ class Location(object):                                                         
             self.locationId,
             headers=self.client._headers()                                       # pylint: disable=protected-access
         )
-        print("ZX 1")
         response.raise_for_status()
         data = response.json()
 
-        print("ZX 2")
         # Now feed into other elements
         for gw_data in data['gateways']:
             gateway = self.gateways[gw_data['gatewayId']]
@@ -53,9 +48,7 @@ class Location(object):                                                         
                     system.hotwater.__dict__.update(sys['dhw'])
 
                 for zone_data in sys["zones"]:
-                    print("ZX 3")
                     zone = system.zones[zone_data['name']]
                     zone.__dict__.update(zone_data)
 
-        print("ZX 4")
         return data
