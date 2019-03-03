@@ -13,6 +13,7 @@ class Location(object):                                                         
         self.gateways = {}
         self.locationId = None                                                   # pylint: disable=invalid-name
 
+        print("ZX A")
         if data is not None:
             self.__dict__.update(data['locationInfo'])
 
@@ -21,7 +22,9 @@ class Location(object):                                                         
                 self._gateways.append(gateway)
                 self.gateways[gateway.gatewayId] = gateway                       # pylint: disable=no-member
 
+            print("ZX B")
             self.status()
+        print("ZX C")
 
     def status(self):
         """Retrieves the location status."""
