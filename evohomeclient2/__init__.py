@@ -4,10 +4,19 @@
    """
 from __future__ import print_function
 from datetime import datetime, timedelta
+import logging
 import requests
 
+try:
+    import http.client as http_client
+except ImportError:
+    # Python 2
+    import httplib as http_client
+
 from .location import Location
-from .base import EvohomeBase
+
+logging.basicConfig()
+_LOGGER = logging.getLogger(__name__)
 
 HEADER_ACCEPT = (
     "application/json, application/xml, text/json, text/x-json, "
@@ -24,13 +33,26 @@ HEADER_BASIC_AUTH = {
 }
 
 
-class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attributes
-    """Provides access to the Evohome API"""
+class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes,useless-object-inheritance
+    """Provides access to the Evohome API."""
 
-    # pylint: disable=too-many-arguments
     def __init__(self, username, password, debug=False, refresh_token=None,
-                 access_token=None, access_token_expires=None):
-        super(EvohomeClient, self).__init__(debug)
+                 access_token=None, access_token_expires=None):                  # pylint: disable=too-many-arguments
+
+        if debug is True:
+            _LOGGER.setLevel(logging.DEBUG)
+            _LOGGER.debug("Debug mode is explicitly enabled.")
+
+            requests_logger = logging.getLogger("requests.packages.urllib3")
+            requests_logger.setLevel(logging.DEBUG)
+            requests_logger.propagate = True
+
+            http_client.HTTPConnection.debuglevel = 1
+        else:
+            _LOGGER.debug(
+                "Debug mode is not explicitly enabled "
+                "(but may be enabled elsewhere)."
+            )
 
         self.username = username
         self.password = password
@@ -53,7 +75,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
     def _headers(self):
         """Ensure the Authorization Header has a valid Access Token."""
 
-        if self.access_token is None or self.access_token_expires is None:
+        if not self.access_token or not self.access_token_expires:
             self._basic_login()
 
         elif datetime.now() > self.access_token_expires - timedelta(seconds=30):
@@ -66,20 +88,23 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         """Obtain a (new) access token from the vendor.
 
         First, try using the refresh_token, if one is available, otherwise
-        authenticate using the user credentials."""
-
+        authenticate using the user credentials.
+        """
         self.access_token = self.access_token_expires = None
 
-        if self.refresh_token is not None:
+        if self.refresh_token:
+            _LOGGER.debug("Trying refresh_token...")
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
             if not self._obtain_access_token(credentials):
                 # invalid refresh_token, silently try username/password instead
+                _LOGGER.warning("Invalid refresh_token.")
                 self.refresh_token = None
 
-        if self.refresh_token is None:
+        if not self.refresh_token:
+            _LOGGER.debug("Trying user credentials...")
             credentials = {'grant_type': "password",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous EMEA-V1-Get-Current-User-Account",
                            'Username': self.username,
@@ -91,8 +116,8 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
     def _obtain_access_token(self, credentials):
         """Get an access token using the supplied credentials.
 
-        Return False if this is not possible."""
-
+        Return False if this is not possible.
+        """
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         payload = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -116,7 +141,8 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         response.raise_for_status()
 
         try:  # validate the access token
-            response_json = response.json()  # this may cause a ValueError
+            # this may cause a ValueError
+            response_json = response.json()
 
             # these may cause a KeyError
             self.access_token = response_json['access_token']
@@ -125,10 +151,12 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
             self.refresh_token = response_json['refresh_token']
 
         except KeyError as error:
-            raise KeyError("Unable to obtain an Access Token: ", error)
+            raise KeyError("Unable to obtain an Access Token: ", response_json)
 
         except ValueError as error:
             raise ValueError("Unable to obtain an Access Token: ", error)
+
+        _LOGGER.debug("New refresh_token = %s", self.refresh_token)
 
         return True
 
@@ -139,29 +167,19 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
 
     def _get_single_heating_system(self):
         # This allows a shortcut for some systems
-        location = None
-        gateway = None
-        control_system = None
+        if len(self.locations) != 1:
+            raise Exception("More (or less) than one location available")
 
-        if len(self.locations) == 1:
-            location = self.locations[0]
-        else:
-            raise Exception("More than one location available")
+        if len(self.locations[0]._gateways) != 1:                                # pylint: disable=protected-access
+            raise Exception("More (or less) than one gateway available")
 
-        if len(location._gateways) == 1:  # pylint: disable=protected-access
-            gateway = location._gateways[0]  # pylint: disable=protected-access
-        else:
-            raise Exception("More than one gateway available")
+        if len(self.locations[0]._gateways[0]._control_systems) != 1:            # pylint: disable=protected-access
+            raise Exception("More (or less) than one control system available")
 
-        if len(gateway._control_systems) == 1:  # pylint: disable=protected-access
-            control_system = gateway._control_systems[0]  # pylint: disable=protected-access
-        else:
-            raise Exception("More than one control system available")
-
-        return control_system
+        return self.locations[0]._gateways[0]._control_systems[0]                # pylint: disable=protected-access
 
     def user_account(self):
-        """Gets user account information"""
+        """Return the user account information."""
         self.account_info = None
 
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount'
@@ -173,7 +191,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return self.account_info
 
     def installation(self):
-        """Returns details of the installation"""
+        """Return the details of the installation."""
         self.locations = []
 
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
@@ -193,7 +211,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return self.installation_info
 
     def full_installation(self, location=None):
-        """Retrieves full details of the installation"""
+        """Return the full details of the installation."""
         url = ("https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
                "/%s/installationInfo?includeTemperatureControlSystems=True"
                % self._get_location(location))
@@ -204,7 +222,7 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def gateway(self):
-        """Retrieves details of the gateway"""
+        """Return the detail of the gateway."""
         url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway'
 
         response = requests.get(url, headers=self._headers())
@@ -213,41 +231,41 @@ class EvohomeClient(EvohomeBase):  # pylint: disable=too-many-instance-attribute
         return response.json()
 
     def set_status_normal(self):
-        """Sets the system into normal heating mode"""
+        """Set the system into normal heating mode."""
         return self._get_single_heating_system().set_status_normal()
 
     def set_status_reset(self):
-        """Resets the system mode"""
+        """Reset the system mode."""
         return self._get_single_heating_system().set_status_reset()
 
     def set_status_custom(self, until=None):
-        """Sets the system into custom heating mode"""
+        """Set the system into custom heating mode."""
         return self._get_single_heating_system().set_status_custom(until)
 
     def set_status_eco(self, until=None):
-        """Sets the system into eco heating mode"""
+        """Set the system into eco heating mode."""
         return self._get_single_heating_system().set_status_eco(until)
 
     def set_status_away(self, until=None):
-        """Sets the system into away heating mode"""
+        """Set the system into away heating mode."""
         return self._get_single_heating_system().set_status_away(until)
 
     def set_status_dayoff(self, until=None):
-        """Sets the system into day off heating mode"""
+        """Set the system into day off heating mode."""
         return self._get_single_heating_system().set_status_dayoff(until)
 
     def set_status_heatingoff(self, until=None):
-        """Sets the system into heating off heating mode"""
+        """Set the system into heating off heating mode."""
         return self._get_single_heating_system().set_status_heatingoff(until)
 
     def temperatures(self):
-        """Returns the current zone temperatures and set points"""
+        """Return the current zone temperatures and set points."""
         return self._get_single_heating_system().temperatures()
 
     def zone_schedules_backup(self, filename):
-        """Backs up the current system configuration to the given file"""
+        """Back up the current system configuration to the given file."""
         return self._get_single_heating_system().zone_schedules_backup(filename)
 
     def zone_schedules_restore(self, filename):
-        """Restores the current system configuration from the given file"""
+        """Restore the current system configuration from the given file."""
         return self._get_single_heating_system().zone_schedules_restore(filename)

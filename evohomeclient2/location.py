@@ -1,38 +1,38 @@
-"""Provides handling of a location"""
+"""Provides handling of a location."""
 import requests
+
 from .gateway import Gateway
-from .base import EvohomeBase
 
 
-class Location(EvohomeBase):  # pylint: disable=too-few-public-methods
-    """Provides handling of a location"""
+class Location(object):                                                          # pylint: disable=too-few-public-methods,useless-object-inheritance
+    """Provides handling of a location."""
 
     def __init__(self, client, data=None):
-        super(Location, self).__init__()
         self.client = client
         self._gateways = []
         self.gateways = {}
-        self.locationId = None  # pylint: disable=invalid-name
+        self.locationId = None                                                   # pylint: disable=invalid-name
+
         if data is not None:
             self.__dict__.update(data['locationInfo'])
 
             for gw_data in data['gateways']:
                 gateway = Gateway(client, self, gw_data)
                 self._gateways.append(gateway)
-                self.gateways[gateway.gatewayId] = gateway  # pylint: disable=no-member
+                self.gateways[gateway.gatewayId] = gateway                       # pylint: disable=no-member
+
             self.status()
 
     def status(self):
-        """Retrieves the location status"""
-        response = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/location/%s/status?includeTemperatureControlSystems=True' %
-                                self.locationId,
-                                headers=self.client._headers())  # pylint: disable=protected-access
-
-        if response.status_code != requests.codes.ok:  # pylint: disable=no-member
-            response.raise_for_status()
-
-        # pylint: disable=protected-access
-        data = self.client._convert(response.text)
+        """Retrieves the location status."""
+        response = requests.get(
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
+            "location/%s/status?includeTemperatureControlSystems=True" %
+            self.locationId,
+            headers=self.client._headers()                                       # pylint: disable=protected-access
+        )
+        response.raise_for_status()
+        data = response.json()
 
         # Now feed into other elements
         for gw_data in data['gateways']:
