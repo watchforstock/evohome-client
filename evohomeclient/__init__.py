@@ -176,30 +176,30 @@ class EvohomeClient:
             func = requests.put
         elif method == 'post':
             func = requests.post
+
         response = func(url, data=data, headers=self.headers)
-        if response.status_code == requests.codes.unauthorized and retry:  # pylint: disable=no-member
-            # Attempt to refresh session id if request was unauthorised
+
+        # catch 401/unauthorized since we may retry
+        if response.status_code == requests.codes.unauthorized and retry:        # pylint: disable=no-member
+            # Attempt to refresh sessionId if it has expired
             if 'code' in response.text:  # don't use response.json() here!
-                if response.json()['code'] == "Unauthorized":
+                if response.json()[0]['code'] == "Unauthorized":
+                    # Get a new sessionId
                     self.user_data = None
                     self._populate_user_info()
-                    # Set sessionID in headers
+                    # Set headers with new sessionId
                     session_id = self.user_data['sessionId']
                     self.headers['sessionId'] = session_id
 
                     response = func(url, data=data, headers=self.headers)
-                else:
-                    message = ("HTTP Status = " + str(response.status_code) + ", Response = " + response.text)
-                    raise requests.HTTPError(message)
 
-        # catch 429/too_many_requests first, for a consistent experience
-        if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
-            response.raise_for_status()
-        if response.status_code != requests.codes.ok:                        # pylint: disable=no-member
+        # display error message if the vendor provided one
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             if 'code' in response.text:  # don't use response.json()!
                 message = ("HTTP Status = " + str(response.status_code)
                            + ", Response = " + response.text)
                 raise requests.HTTPError(message)
+
         response.raise_for_status()
 
         return response
