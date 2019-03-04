@@ -21,7 +21,7 @@ class EvohomeClient(EvohomeBase):
         else:
             return location
 
-    def _get_single_heating_system(self):
+    def get_single_heating_system(self):
         # This allows a shortcut for some systems
         location = None
         gateway = None
