@@ -179,14 +179,18 @@ class EvohomeClient:
         response = func(url, data=data, headers=self.headers)
         if response.status_code == requests.codes.unauthorized and retry:  # pylint: disable=no-member
             # Attempt to refresh session id if request was unauthorised
-            if 'Unauthorized' in response.text:
-                self.user_data = None
-                self._populate_user_info()
-                # Set sessionID in headers
-                session_id = self.user_data['sessionId']
-                self.headers['sessionId'] = session_id
+            if 'code' in response.text:  # don't use response.json() here!
+                if response.json()['code'] = "Unauthorized":
+                    self.user_data = None
+                    self._populate_user_info()
+                    # Set sessionID in headers
+                    session_id = self.user_data['sessionId']
+                    self.headers['sessionId'] = session_id
 
-                response = func(url, data=data, headers=self.headers)
+                    response = func(url, data=data, headers=self.headers)
+                else:
+                    message = ("HTTP Status = " + str(response.status_code) + ", Response = " + response.text)
+                    raise requests.HTTPError(message)
 
         # catch 429/too_many_requests first, for a consistent experience
         if response.status_code == requests.codes.too_many_requests:         # pylint: disable=no-member
@@ -196,7 +200,7 @@ class EvohomeClient:
                 message = ("HTTP Status = " + str(response.status_code)
                            + ", Response = " + response.text)
                 raise requests.HTTPError(message)
-            response.raise_for_status()
+        response.raise_for_status()
 
         return response
 
