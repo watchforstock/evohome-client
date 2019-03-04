@@ -180,7 +180,7 @@ class EvohomeClient:
         if response.status_code == requests.codes.unauthorized and retry:  # pylint: disable=no-member
             # Attempt to refresh session id if request was unauthorised
             if 'code' in response.text:  # don't use response.json() here!
-                if response.json()['code'] = "Unauthorized":
+                if response.json()['code'] == "Unauthorized":
                     self.user_data = None
                     self._populate_user_info()
                     # Set sessionID in headers
