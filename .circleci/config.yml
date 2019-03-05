@@ -24,7 +24,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            sudo pip install nose requests_mock coverage pylint
+            sudo pip install nose requests_mock coverage pylint tox tox-pyenv
       - run:
           command: |
             mkdir test-results
@@ -33,7 +33,10 @@ jobs: # A basic unit of work in a run
           name: Test
           command: |
             pylint --disable=C0301 evohomeclient
-            nosetests --xunit-file=test-results/junit.xml
+            pyenv local 2.7.10 3.6.0
+            # nosetests --xunit-file=test-results/junit.xml
+            tox
+            coverage report -m --fail-under=99 --include="evohomeclient/*" --omit="*/tests.py"
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/

@@ -377,7 +377,7 @@ def test_zone_temp(mock):
     mock.put(
         'http://localhost:5050/WebAPI/api/devices/121212/thermostat/changeableValues/heatSetpoint', text=TASK_ACCEPTED)
     mock.put(
-        'http://localhost:5050/WebAPI/api/devices/131313/thermostat/changeableValues', text=TASK_ACCEPTED)
+        'http://localhost:5050/WebAPI/api/devices/131313/thermostat/changeableValues', text=TASK_ACCEPTED_LIST)
     mock.get('http://localhost:5050/WebAPI/api/commTasks?commTaskId=123',
              [{"status_code": 200, "text": """{"state":"pending"}"""}, {"status_code": 200, "text": """{"state":"Succeeded"}"""}])
     client = EvohomeClient("username", "password",
@@ -400,7 +400,7 @@ def test_zone_temp_no_dhw(mock):
     mock.get('http://localhost:5050/WebAPI/api/locations?userId=123456&allData=True',
              text=VALID_ZONE_RESPONSE_NO_DHW)
     mock.put(
-        'http://localhost:5050/WebAPI/api/devices/121212/thermostat/changeableValues/heatSetpoint', text=TASK_ACCEPTED)
+        'http://localhost:5050/WebAPI/api/devices/121212/thermostat/changeableValues/heatSetpoint', text=TASK_ACCEPTED_LIST)
     mock.put(
         'http://localhost:5050/WebAPI/api/devices/131313/thermostat/changeableValues', text=TASK_ACCEPTED_LIST)
     mock.get('http://localhost:5050/WebAPI/api/commTasks?commTaskId=123',
