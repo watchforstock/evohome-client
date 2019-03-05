@@ -1,7 +1,7 @@
 """evohomeclient2 provides a client for the oiginal Evohome API.
 
-   Further information at: https://evohome-client.readthedocs.io
-   """
+Further information at: https://evohome-client.readthedocs.io
+"""
 from __future__ import print_function
 
 import codecs
@@ -9,11 +9,8 @@ import json
 import logging
 import time
 import sys
-import requests
 
-logging.basicConfig()
-_LOGGER = logging.getLogger(__name__)
-REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
+import requests
 
 try:
     import http.client as http_client
@@ -21,14 +18,16 @@ except ImportError:
     # Python 2
     import httplib as http_client
 
-
-# stole this from requests library. To determine whether we are dealing
-# with Python 2 or 3
+# Are we are dealing with Python 2 or 3
 _VER = sys.version_info
 #: Python 2.x?
 IS_PY2 = (_VER[0] == 2)
 #: Python 3.x?
 IS_PY3 = (_VER[0] == 3)
+
+logging.basicConfig()
+_LOGGER = logging.getLogger(__name__)
+REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 
 class EvohomeClient:
@@ -41,9 +40,26 @@ class EvohomeClient:
 
         If user_data is given then this will be used to try and reduce
         the number of calls to the authentication service which is known
-        to be rate limited"""
+        to be rate limited.
+        """
+        if debug is True:
+            _LOGGER.setLevel(logging.DEBUG)
+            _LOGGER.debug("Debug mode is explicitly enabled.")
+
+            requests_logger = logging.getLogger("requests.packages.urllib3")
+            requests_logger.setLevel(logging.DEBUG)
+            requests_logger.propagate = True
+
+            http_client.HTTPConnection.debuglevel = 1
+        else:
+            _LOGGER.debug(
+                "Debug mode is not explicitly enabled "
+                "(but may be enabled elsewhere)."
+            )
+
         self.username = username
         self.password = password
+
         self.user_data = user_data
         self.hostname = hostname
 
@@ -56,15 +72,6 @@ class EvohomeClient:
         self.named_devices = {}
         self.postdata = {}
         self.headers = {}
-
-        if debug is True:
-            _LOGGER.setLevel(logging.DEBUG)
-            _LOGGER.debug("__init__(): Debug mode is explicitly enabled.")
-            REQUESTS_LOGGER.setLevel(logging.DEBUG)
-            REQUESTS_LOGGER.propagate = True
-            http_client.HTTPConnection.debuglevel = 1
-        else:
-            _LOGGER.debug("__init__(): Debug mode was not explicitly enabled.")
 
     def _convert(self, content):
         return json.loads(self.reader(content)[0])
@@ -119,7 +126,7 @@ class EvohomeClient:
         return self.user_data
 
     def temperatures(self, force_refresh=False):
-        """Retrieve the current details for each zone. Returns a generator"""
+        """Retrieve the current details for each zone. Returns a generator."""
         self._populate_full_data(force_refresh)
         for device in self.full_data['devices']:
             set_point = 0
@@ -139,7 +146,7 @@ class EvohomeClient:
                    'mode': device['thermostat']['changeableValues']['mode']}
 
     def get_modes(self, zone):
-        """Returns the set of modes the device can be assigned"""
+        """Returns the set of modes the device can be assigned."""
         self._populate_full_data()
         device = self._get_device(zone)
         return device['thermostat']['allowedModes']
@@ -184,20 +191,22 @@ class EvohomeClient:
             # Attempt to refresh sessionId if it has expired
             if 'code' in response.text:  # don't use response.json() here!
                 if response.json()[0]['code'] == "Unauthorized":
+                    _LOGGER.debug("Session expired, re-authenticating...")
                     # Get a new sessionId
                     self.user_data = None
                     self._populate_user_info()
                     # Set headers with new sessionId
                     session_id = self.user_data['sessionId']
                     self.headers['sessionId'] = session_id
+                    _LOGGER.debug("sessionId = %s", session_id)
 
                     response = func(url, data=data, headers=self.headers)
 
         # display error message if the vendor provided one
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             if 'code' in response.text:  # don't use response.json()!
-                message = ("HTTP Status = " + str(response.status_code)
-                           + ", Response = " + response.text)
+                message = ("HTTP Status = " + str(response.status_code) +
+                           ", Response = " + response.text)
                 raise requests.HTTPError(message)
 
         response.raise_for_status()
@@ -225,27 +234,27 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_status_normal(self):
-        """Sets the system to normal operation"""
+        """Sets the system to normal operation."""
         self._set_status('Auto')
 
     def set_status_custom(self, until=None):
-        """Sets the system to the custom programme"""
+        """Sets the system to the custom programme."""
         self._set_status('Custom', until)
 
     def set_status_eco(self, until=None):
-        """Sets the system to the eco mode"""
+        """Sets the system to the eco mode."""
         self._set_status('AutoWithEco', until)
 
     def set_status_away(self, until=None):
-        """Sets the system to the away mode"""
+        """Sets the system to the away mode."""
         self._set_status('Away', until)
 
     def set_status_dayoff(self, until=None):
-        """Sets the system to the day off mode"""
+        """Sets the system to the day off mode."""
         self._set_status('DayOff', until)
 
     def set_status_heatingoff(self, until=None):
-        """Sets the system to the heating off mode"""
+        """Sets the system to the heating off mode."""
         self._set_status('HeatingOff', until)
 
     def _get_device_id(self, zone):
@@ -268,7 +277,7 @@ class EvohomeClient:
             time.sleep(1)
 
     def set_temperature(self, zone, temperature, until=None):
-        """Sets the temperature of the given zone"""
+        """Sets the temperature of the given zone."""
         if until is None:
             data = {"Value": temperature, "Status": "Hold", "NextTime": None}
         else:
@@ -279,7 +288,7 @@ class EvohomeClient:
         self._set_heat_setpoint(zone, data)
 
     def cancel_temp_override(self, zone):
-        """Removes an existing temperature override"""
+        """Removes an existing temperature override."""
         data = {"Value": None, "Status": "Scheduled", "NextTime": None}
         self._set_heat_setpoint(zone, data)
 
@@ -291,7 +300,8 @@ class EvohomeClient:
 
     def _set_dhw(self, status="Scheduled", mode=None, next_time=None):
         """Set DHW to On, Off or Auto, either indefinitely, or until a
-        specified time."""
+        specified time.
+        """
         data = {"Status": status,
                 "Mode": mode,
                 "NextTime": next_time,
