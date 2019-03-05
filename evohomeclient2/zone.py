@@ -77,9 +77,6 @@ class Zone(ZoneBase):
 
         self.zone_type = 'temperatureZone'
 
-        _LOGGER.warn("Zone, data = %s", data)
-        _LOGGER.warn("Zone, dir() = %s", dir(self))
-
     def set_temperature(self, temperature, until=None):
         """Sets the temperature of the given zone"""
         if until is None:

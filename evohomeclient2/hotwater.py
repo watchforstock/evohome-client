@@ -24,9 +24,6 @@ class HotWater(ZoneBase):
         self.zoneId = self.dhwId
         self.zone_type = 'domesticHotWater'
 
-        _LOGGER.warn("HotWater, data = %s", data)
-        _LOGGER.warn("HotWater, dir() = %s", dir(self))
-
     def _set_dhw(self, data):
         headers = dict(self.client._headers())                                   # pylint: disable=protected-access
         headers['Content-Type'] = 'application/json'
