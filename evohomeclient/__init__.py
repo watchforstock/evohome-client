@@ -30,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 
-class EvohomeClient:
+class EvohomeClient(object):
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
 
@@ -99,16 +99,6 @@ class EvohomeClient:
             for device in self.full_data['devices']:
                 self.devices[device['deviceID']] = device
                 self.named_devices[device['name']] = device
-
-    def _populate_gateway_info(self):
-        self._populate_full_data()
-        if self.gateway_data is None:
-            url = (self.hostname + "/WebAPI/api/gateways"
-                   "?locationId=%s&allData=False" % self.location_id)
-
-            response = self._do_request('get', url)
-
-            self.gateway_data = self._convert(response.content)[0]
 
     def _populate_user_info(self):
         if self.user_data is None:
@@ -310,8 +300,11 @@ class EvohomeClient:
                 "CoolSetpoint": None}
 
         self._populate_full_data()
+        dhw_zone = self._get_dhw_zone()
+        if dhw_zone is None:
+            raise Exception('No DHW zone reported from API')
         url = (self.hostname + "/WebAPI/api/devices"
-               "/%s/thermostat/changeableValues" % self._get_dhw_zone())
+               "/%s/thermostat/changeableValues" % dhw_zone)
 
         response = self._do_request('put', url, json.dumps(data))
 
