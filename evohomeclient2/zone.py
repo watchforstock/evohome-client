@@ -1,11 +1,7 @@
 """Provides handling of individual zones"""
 import json
-import logging
 
 import requests
-
-logging.basicConfig()
-_LOGGER = logging.getLogger(__name__)
 
 
 class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
