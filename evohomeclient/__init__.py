@@ -2,8 +2,6 @@
 
 Further information at: https://evohome-client.readthedocs.io
 """
-from __future__ import print_function
-
 import codecs
 import json
 import logging
@@ -27,7 +25,6 @@ IS_PY3 = (_VER[0] == 3)
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
-REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 
 class EvohomeClient(object):  # pylint: disable=useless-object-inheritance

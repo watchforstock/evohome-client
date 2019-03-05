@@ -1,5 +1,6 @@
 """Provides handling of individual zones"""
 import json
+
 import requests
 
 
@@ -8,6 +9,7 @@ class ZoneBase(object):                                                         
 
     def __init__(self, client):
         self.client = client
+        self.name = None
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
 
@@ -66,10 +68,6 @@ class Zone(ZoneBase):
 
     def __init__(self, client, data):
         super(Zone, self).__init__(client)
-
-        self.name = None
-        self.zoneId = None                                                       # pylint: disable=invalid-name
-        self.zone_type = None
 
         self.__dict__.update(data)
 
