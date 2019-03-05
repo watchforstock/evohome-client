@@ -1,8 +1,13 @@
 """Provides handling of the hot water zone."""
 import json
+import logging
+
 import requests
 
 from .zone import ZoneBase
+
+logging.basicConfig()
+_LOGGER = logging.getLogger(__name__)
 
 
 class HotWater(ZoneBase):
@@ -13,12 +18,15 @@ class HotWater(ZoneBase):
 
         self.name = ""
         self.dhwId = None                                                        # pylint: disable=invalid-name
-        self.zone_type = None
 
         self.__dict__.update(data)
 
         self.zone_type = 'domesticHotWater'
         self.zoneId = self.dhwId
+
+        _LOGGER.warn("HotWater, data = %s", data)
+        _LOGGER.warn("HotWater, dir() = %s", dir(self))
+
 
     def _set_dhw(self, data):
         headers = dict(self.client._headers())                                   # pylint: disable=protected-access
@@ -26,7 +34,7 @@ class HotWater(ZoneBase):
         url = (
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/domesticHotWater/%s/state" % self.dhwId
-        )                                                                        # pylint: disable=no-member
+        )
 
         response = requests.put(url, data=json.dumps(data), headers=headers)
         response.raise_for_status()

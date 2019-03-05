@@ -22,7 +22,6 @@ class ControlSystem(object):                                                    
         self.zones = {}
         self.zones_by_id = {}
         self.hotwater = None
-# TODO: is systemId set via self.__dict__.update(local_data)?
         self.systemId = None                                                     # pylint: disable=invalid-name
 
         if data is not None:
@@ -30,7 +29,7 @@ class ControlSystem(object):                                                    
             del local_data['zones']
             self.__dict__.update(local_data)
 
-            for z_data in data['zones']:  # treat dict as list
+            for z_data in data['zones']:
                 zone = Zone(client, z_data)
                 self._zones.append(zone)
                 self.zones[zone.name] = zone

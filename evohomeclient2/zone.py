@@ -1,6 +1,11 @@
 """Provides handling of individual zones"""
 import json
+import logging
+
 import requests
+
+logging.basicConfig()
+_LOGGER = logging.getLogger(__name__)
 
 
 class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
@@ -8,6 +13,7 @@ class ZoneBase(object):                                                         
 
     def __init__(self, client):
         self.client = client
+        self.name = None
         self.zoneId = None                                                       # pylint: disable=invalid-name
         self.zone_type = None
 
@@ -67,13 +73,12 @@ class Zone(ZoneBase):
     def __init__(self, client, data):
         super(Zone, self).__init__(client)
 
-        self.name = None
-        self.zoneId = None                                                       # pylint: disable=invalid-name
-        self.zone_type = None
-
         self.__dict__.update(data)
 
         self.zone_type = 'temperatureZone'
+
+        _LOGGER.warn("Zone, data = %s", data)
+        _LOGGER.warn("Zone, dir() = %s", dir(self))
 
     def set_temperature(self, temperature, until=None):
         """Sets the temperature of the given zone"""
