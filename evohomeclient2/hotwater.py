@@ -16,17 +16,16 @@ class HotWater(ZoneBase):
     def __init__(self, client, data):
         super(HotWater, self).__init__(client)
 
-        self.name = ""
         self.dhwId = None                                                        # pylint: disable=invalid-name
 
         self.__dict__.update(data)
 
-        self.zone_type = 'domesticHotWater'
+        self.name = ""
         self.zoneId = self.dhwId
+        self.zone_type = 'domesticHotWater'
 
         _LOGGER.warn("HotWater, data = %s", data)
         _LOGGER.warn("HotWater, dir() = %s", dir(self))
-
 
     def _set_dhw(self, data):
         headers = dict(self.client._headers())                                   # pylint: disable=protected-access
