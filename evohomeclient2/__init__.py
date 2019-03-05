@@ -1,7 +1,7 @@
 """evohomeclient2 provides a client for the updated Evohome API.
 
-Further information at: https://evohome-client.readthedocs.io
-"""
+   Further information at: https://evohome-client.readthedocs.io
+   """
 from datetime import datetime, timedelta
 import logging
 
