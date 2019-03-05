@@ -116,7 +116,6 @@ class ControlSystem(object):                                                    
 
     def zone_schedules_backup(self, filename):
         """Backup all zones on control system to the given file."""
-        _LOGGER.setLevel(logging.INFO)
         _LOGGER.info("Backing up schedules from ControlSystem: %s (%s)...",
                      self.systemId, self.location.name)
 
@@ -150,9 +149,8 @@ class ControlSystem(object):                                                    
 
     def zone_schedules_restore(self, filename):
         """Restore all zones on control system from the given file."""
-        _LOGGER.setLevel(logging.INFO)
-        _LOGGER.warning("Restoring schedules to ControlSystem %s (%s)...",
-                        self.systemId, self.location)
+        _LOGGER.info("Restoring schedules to ControlSystem %s (%s)...",
+                     self.systemId, self.location)
 
         _LOGGER.info("Reading from backup file: %s...", filename)
         with open(filename, 'r') as file_input:
