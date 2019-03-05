@@ -30,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 REQUESTS_LOGGER = logging.getLogger("requests.packages.urllib3")
 
 
-class EvohomeClient(object):
+class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
     """Provides a client to access the Honeywell Evohome system"""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
 
