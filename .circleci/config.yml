@@ -17,7 +17,7 @@ jobs: # A basic unit of work in a run
           command: |
             mkdir test-results
             pip install requests
-  test36:
+  test:
     docker:
       - image: circleci/python:3.6.4
     steps:
@@ -33,33 +33,7 @@ jobs: # A basic unit of work in a run
           name: Test
           command: |
             pylint --disable=C0301 evohomeclient
-            coverage run nosetests --xunit-file=test-results/junit.xml
-            # tox
-            coverage report -m --fail-under=99 --include="evohomeclient/*" --omit="*/tests.py"
-      - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-          path: test-results
-      - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-          path: htmlcov
-          destination: coverage
-  test27:
-    docker:
-      - image: circleci/python:2.7.15
-    steps:
-      - checkout
-      - run:
-          command: |
-            sudo pip install nose requests_mock coverage pylint
-      - run:
-          command: |
-            mkdir test-results
-            pip install requests
-      - run:
-          name: Test
-          command: |
-            pylint --disable=C0301 evohomeclient
-            coverage run nosetests --xunit-file=test-results/junit.xml
-            # tox
-            coverage report -m --fail-under=99 --include="evohomeclient/*" --omit="*/tests.py"
+            nosetests --xunit-file=test-results/junit.xml
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
@@ -116,13 +90,7 @@ workflows:
           filters:  # required since `deploy` has tag filters AND requires `build`
             tags:
               only: /.*/
-      - test27:
-          requires:
-            - build
-          filters:  # required since `deploy` has tag filters AND requires `build`
-            tags:
-              only: /.*/
-      - test36:
+      - test:
           requires:
             - build
           filters:  # required since `deploy` has tag filters AND requires `build`
@@ -131,8 +99,7 @@ workflows:
       - deploy:
           requires:
             - build
-            - test27
-            - test36
+            - test
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
