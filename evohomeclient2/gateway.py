@@ -17,4 +17,4 @@ class Gateway(object):                                                          
             for cs_data in data['temperatureControlSystems']:
                 control_system = ControlSystem(client, location, self, cs_data)
                 self._control_systems.append(control_system)
-                self.control_systems[control_system.systemId] = control_system   # pylint: disable=no-member
+                self.control_systems[control_system.systemId] = control_system

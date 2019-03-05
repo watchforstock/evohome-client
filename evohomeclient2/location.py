@@ -42,7 +42,8 @@ class Location(object):                                                         
                 system = gateway.control_systems[sys['systemId']]
 
                 system.__dict__.update(
-                    {'systemModeStatus': sys['systemModeStatus'], 'activeFaults': sys['activeFaults']})
+                    {'systemModeStatus': sys['systemModeStatus'],
+                     'activeFaults': sys['activeFaults']})
 
                 if 'dhw' in sys:
                     system.hotwater.__dict__.update(sys['dhw'])
