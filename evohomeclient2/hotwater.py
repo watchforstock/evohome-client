@@ -1,13 +1,9 @@
 """Provides handling of the hot water zone."""
 import json
-import logging
 
 import requests
 
 from .zone import ZoneBase
-
-logging.basicConfig()
-_LOGGER = logging.getLogger(__name__)
 
 
 class HotWater(ZoneBase):
