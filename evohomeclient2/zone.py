@@ -1,16 +1,26 @@
+"""Provides handling of individual zones"""
 import json
-import requests
-from .base import EvohomeBase, EvohomeClientInvalidPostData
 
-class ZoneBase(EvohomeBase):
-    def __init__(self):
-        super(ZoneBase, self).__init__()
+import requests
+
+
+class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
+    """Provides the base for Zones"""
+
+    def __init__(self, client):
+        self.client = client
+        self.name = None
+        self.zoneId = None                                                       # pylint: disable=invalid-name
+        self.zone_type = None
 
     def schedule(self):
-        r = requests.get('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), headers=self.client.headers())
-
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        """Gets the schedule for the given zone"""
+        response = requests.get(
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "/%s/%s/schedule" % (self.zone_type, self.zoneId),
+            headers=self.client._headers()                                       # pylint: disable=no-member,protected-access
+        )
+        response.raise_for_status()
 
         mapping = [
             ('dailySchedules', 'DailySchedules'),
@@ -20,59 +30,78 @@ class ZoneBase(EvohomeBase):
             ('switchpoints', 'Switchpoints'),
             ('dhwState', 'DhwState'),
         ]
-        j = r.text
-        for f, t in mapping:
-            j = j.replace(f, t)
-            
-        d = self._convert(j)
+
+        response_data = response.text
+        for from_val, to_val in mapping:
+            response_data = response_data.replace(from_val, to_val)
+
+        data = json.loads(response_data)
         # change the day name string to a number offset (0 = Monday)
-        for day_of_week, schedule in enumerate(d['DailySchedules']):
+        for day_of_week, schedule in enumerate(data['DailySchedules']):
             schedule['DayOfWeek'] = day_of_week
-        return d
-        
+        return data
+
     def set_schedule(self, zone_info):
+        """Sets the schedule for this zone"""
         # must only POST json, otherwise server API handler raises exceptions
-
         try:
-            t1 = json.loads(zone_info)
-        except:
-            raise EvohomeClientInvalidPostData('zone_info must be JSON')
+            json.loads(zone_info)
 
-        headers = dict(self.client.headers())
+        except ValueError as error:
+            raise ValueError("zone_info must be valid JSON: ", error)
+
+        headers = dict(self.client._headers())                                   # pylint: disable=protected-access
         headers['Content-Type'] = 'application/json'
-        r = requests.put('https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule' % (self.zone_type, self.zoneId), data=zone_info, headers=headers)
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        response = requests.put(
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "/%s/%s/schedule" % (self.zone_type, self.zoneId),
+            data=zone_info, headers=headers
+        )
+        response.raise_for_status()
 
-        return self._convert(r.text)
+        return response.json()
+
 
 class Zone(ZoneBase):
+    """Provides the access to an individual zone."""
 
-    def __init__(self, client, data=None):
-        super(Zone, self).__init__()
-        self.client = client
+    def __init__(self, client, data):
+        super(Zone, self).__init__(client)
+
+        self.__dict__.update(data)
+
         self.zone_type = 'temperatureZone'
-        if data is not None:
-            self.__dict__.update(data)
 
     def set_temperature(self, temperature, until=None):
+        """Sets the temperature of the given zone"""
         if until is None:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":"PermanentOverride","TimeUntil":None}
+            data = {"SetpointMode": "PermanentOverride",
+                    "HeatSetpointValue": temperature,
+                    "TimeUntil": None}
         else:
-            data = {"HeatSetpointValue":temperature,"SetpointMode":"TemporaryOverride","TimeUntil":until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {"SetpointMode": "TemporaryOverride",
+                    "HeatSetpointValue": temperature,
+                    "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+
         self._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
-        url = 'https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/%s/heatSetpoint' % self.zoneId
-        headers = dict(self.client.headers())
+        url = (
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "/temperatureZone/%s/heatSetpoint" % self.zoneId
+        )
+
+        headers = dict(self.client._headers())                                   # pylint: disable=protected-access
         headers['Content-Type'] = 'application/json'
-        r = requests.put(url, json.dumps(data), headers=headers)
 
-        if r.status_code != requests.codes.ok:
-            r.raise_for_status()
+        response = requests.put(url, json.dumps(data), headers=headers)
+        response.raise_for_status()
 
-    def cancel_temp_override(self, *args, **kwargs):
-        data = {"HeatSetpointValue":0.0,"SetpointMode":"FollowSchedule","TimeUntil":None}
+    def cancel_temp_override(self):
+        """Cancels an override to the zone temperature"""
+        data = {"SetpointMode": "FollowSchedule",
+                "HeatSetpointValue": 0.0,
+                "TimeUntil": None}
+
         self._set_heat_setpoint(data)
-

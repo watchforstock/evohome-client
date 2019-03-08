@@ -57,3 +57,5 @@ test2.py
 /backup.json
 .idea
 /.vscode
+.gitignore.swp
+test-reports/junit.xml
