@@ -34,11 +34,11 @@ HEADER_BASIC_AUTH = {
 
 
 class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes,useless-object-inheritance
-    """Provides access to the Evohome API."""
+    """Provides access to the v2 Evohome API."""
 
     def __init__(self, username, password, debug=False, refresh_token=None,      # pylint: disable=too-many-arguments
                  access_token=None, access_token_expires=None):
-
+        """Construct the EvohomeClient object."""
         if debug is True:
             _LOGGER.setLevel(logging.DEBUG)
             _LOGGER.debug("Debug mode is explicitly enabled.")
@@ -74,7 +74,6 @@ class EvohomeClient(object):                                                    
 
     def _headers(self):
         """Ensure the Authorization Header has a valid Access Token."""
-
         if not self.access_token or not self.access_token_expires:
             self._basic_login()
 
@@ -101,7 +100,7 @@ class EvohomeClient(object):                                                    
 
             try:
                 self._obtain_access_token(credentials)
-            except:
+            except (requests.HTTPError, KeyError, ValueError):
                 _LOGGER.warning(
                     "Invalid refresh_token, will try user credentials.")
                 self.refresh_token = None
@@ -136,12 +135,12 @@ class EvohomeClient(object):                                                    
 
         if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
             if response.text:  # if there is a message, then raise with it
-                raise requests.HTTPError(
-                    "Unable to obtain an Access Token: ", response.text)
+                raise requests.HTTPError("Unable to obtain an Access Token, "
+                                         "response was: ", response.text)
         else:  # raise all others
             response.raise_for_status()
 
-        try:  # validate the access token
+        try:  # the access token _should_ be valid...
             # this may cause a ValueError
             response_json = response.json()
 
@@ -154,12 +153,12 @@ class EvohomeClient(object):                                                    
             self.refresh_token = response_json['refresh_token']
 
         except KeyError:
-            raise KeyError("Unable to obtain an Access Token, response was: ",
-                response_json)
+            raise KeyError("Unable to obtain an Access Token, "
+                           "response was: ", response_json)
 
         except ValueError:
-            raise ValueError("Unable to obtain an Access Token, response was: ",
-                response.text)
+            raise ValueError("Unable to obtain an Access Token, "
+                             "response was: ", response.text)
 
     def _get_location(self, location):
         if location is None:
@@ -204,7 +203,8 @@ class EvohomeClient(object):                                                    
         response.raise_for_status()
 
         self.installation_info = response.json()
-        self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
+        self.system_id = (self.installation_info[0]['gateways'][0]
+                          ['temperatureControlSystems'][0]['systemId'])
 
         for loc_data in self.installation_info:
             self.locations.append(Location(self, loc_data))
