@@ -133,12 +133,13 @@ class EvohomeClient(object):                                                    
 
         response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH)
 
-        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
-            if response.text:  # if there is a message, then raise with it
-                raise requests.HTTPError("Unable to obtain an Access Token, "
-                                         "response was: ", response.text)
-        else:  # raise all others
+        try:
             response.raise_for_status()
+        except requests.HTTPError as err:
+            msg = "Unable to obtain an Access Token"
+            if response.text:  # if there is a message, then raise with it
+                msg = msg + ", response was: " + response.text
+            raise Exception(msg)
 
         try:  # the access token _should_ be valid...
             # this may cause a ValueError
@@ -153,12 +154,12 @@ class EvohomeClient(object):                                                    
             self.refresh_token = response_json['refresh_token']
 
         except KeyError:
-            raise KeyError("Unable to obtain an Access Token, "
-                           "response was: ", response_json)
+            raise Exception("Unable to obtain an Access Token, "
+                            "response was: " + response_json)
 
         except ValueError:
-            raise ValueError("Unable to obtain an Access Token, "
-                             "response was: ", response.text)
+            raise Exception("Unable to obtain an Access Token, "
+                            "response was: " + response.text)
 
     def _get_location(self, location):
         if location is None:
