@@ -33,6 +33,15 @@ HEADER_BASIC_AUTH = {
 }
 
 
+class AuthenticationError(Exception):
+    """Exception raised when unable to get an access_token."""
+
+    def __init__(self, message):
+        """Construct the AuthenticationError object."""
+        self.message = message
+        super(AuthenticationError, self).__init__(message)
+
+
 class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes,useless-object-inheritance
     """Provides access to the v2 Evohome API."""
 
@@ -135,11 +144,12 @@ class EvohomeClient(object):                                                    
 
         try:
             response.raise_for_status()
-        except requests.HTTPError as err:
+
+        except requests.HTTPError:
             msg = "Unable to obtain an Access Token"
             if response.text:  # if there is a message, then raise with it
-                msg = msg + ", response was: " + response.text
-            raise Exception(msg)
+                msg = msg + ", hint: " + response.text
+            raise AuthenticationError(msg)
 
         try:  # the access token _should_ be valid...
             # this may cause a ValueError
@@ -154,12 +164,12 @@ class EvohomeClient(object):                                                    
             self.refresh_token = response_json['refresh_token']
 
         except KeyError:
-            raise Exception("Unable to obtain an Access Token, "
-                            "response was: " + response_json)
+            raise AuthenticationError("Unable to obtain an Access Token, "
+                                      "hint: " + response_json)
 
         except ValueError:
-            raise Exception("Unable to obtain an Access Token, "
-                            "response was: " + response.text)
+            raise AuthenticationError("Unable to obtain an Access Token, "
+                                      "hint: " + response.text)
 
     def _get_location(self, location):
         if location is None:
