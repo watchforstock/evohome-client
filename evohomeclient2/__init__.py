@@ -33,12 +33,21 @@ HEADER_BASIC_AUTH = {
 }
 
 
+class AuthenticationError(Exception):
+    """Exception raised when unable to get an access_token."""
+
+    def __init__(self, message):
+        """Construct the AuthenticationError object."""
+        self.message = message
+        super(AuthenticationError, self).__init__(message)
+
+
 class EvohomeClient(object):                                                     # pylint: disable=too-many-instance-attributes,useless-object-inheritance
-    """Provides access to the Evohome API."""
+    """Provides access to the v2 Evohome API."""
 
     def __init__(self, username, password, debug=False, refresh_token=None,      # pylint: disable=too-many-arguments
                  access_token=None, access_token_expires=None):
-
+        """Construct the EvohomeClient object."""
         if debug is True:
             _LOGGER.setLevel(logging.DEBUG)
             _LOGGER.debug("Debug mode is explicitly enabled.")
@@ -74,7 +83,6 @@ class EvohomeClient(object):                                                    
 
     def _headers(self):
         """Ensure the Authorization Header has a valid Access Token."""
-
         if not self.access_token or not self.access_token_expires:
             self._basic_login()
 
@@ -85,7 +93,7 @@ class EvohomeClient(object):                                                    
                 'Authorization': 'bearer ' + self.access_token}
 
     def _basic_login(self):
-        """Obtain a (new) access token from the vendor.
+        """Obtain a new access token from the vendor.
 
         First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials.
@@ -99,10 +107,11 @@ class EvohomeClient(object):                                                    
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
-            if not self._obtain_access_token(credentials):
-                # invalid refresh_token, silently try username/password instead
-                _LOGGER.warning("Invalid refresh_token, "
-                                "will try user credentials.")
+            try:
+                self._obtain_access_token(credentials)
+            except (requests.HTTPError, KeyError, ValueError):
+                _LOGGER.warning(
+                    "Invalid refresh_token, will try user credentials.")
                 self.refresh_token = None
 
         if not self.refresh_token:
@@ -113,8 +122,7 @@ class EvohomeClient(object):                                                    
                            'Username': self.username,
                            'Password': self.password}
 
-            if not self._obtain_access_token(credentials):
-                raise ValueError("Bad Username/Password, unable to continue.")
+            self._obtain_access_token(credentials)
 
         _LOGGER.debug("refresh_token = %s", self.refresh_token)
         _LOGGER.debug("access_token = %s", self.access_token)
@@ -122,10 +130,6 @@ class EvohomeClient(object):                                                    
                       self.access_token_expires.strftime("%Y-%m-%d %H:%M:%S"))
 
     def _obtain_access_token(self, credentials):
-        """Get an access token using the supplied credentials.
-
-        Return False if this is not possible.
-        """
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         payload = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -138,15 +142,16 @@ class EvohomeClient(object):                                                    
 
         response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH)
 
-        if response.status_code == requests.codes.bad_request:                   # pylint: disable=no-member
-            if 'error' in response.text:  # don't use response.json() here!
-                return response.json()['error'] != 'invalid_grant'
-            raise requests.HTTPError(
-                "Unable to obtain an Access Token: ", response.text)
+        try:
+            response.raise_for_status()
 
-        response.raise_for_status()
+        except requests.HTTPError:
+            msg = "Unable to obtain an Access Token"
+            if response.text:  # if there is a message, then raise with it
+                msg = msg + ", hint: " + response.text
+            raise AuthenticationError(msg)
 
-        try:  # validate the access token
+        try:  # the access token _should_ be valid...
             # this may cause a ValueError
             response_json = response.json()
 
@@ -158,13 +163,13 @@ class EvohomeClient(object):                                                    
             )
             self.refresh_token = response_json['refresh_token']
 
-        except KeyError as error:
-            raise KeyError("Unable to obtain an Access Token: ", response_json)
+        except KeyError:
+            raise AuthenticationError("Unable to obtain an Access Token, "
+                                      "hint: " + response_json)
 
-        except ValueError as error:
-            raise ValueError("Unable to obtain an Access Token: ", error)
-
-        return True
+        except ValueError:
+            raise AuthenticationError("Unable to obtain an Access Token, "
+                                      "hint: " + response.text)
 
     def _get_location(self, location):
         if location is None:
@@ -209,7 +214,8 @@ class EvohomeClient(object):                                                    
         response.raise_for_status()
 
         self.installation_info = response.json()
-        self.system_id = self.installation_info[0]['gateways'][0]['temperatureControlSystems'][0]['systemId']
+        self.system_id = (self.installation_info[0]['gateways'][0]
+                          ['temperatureControlSystems'][0]['systemId'])
 
         for loc_data in self.installation_info:
             self.locations.append(Location(self, loc_data))
