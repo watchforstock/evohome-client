@@ -85,7 +85,7 @@ class EvohomeClient(object):                                                    
                 'Authorization': 'bearer ' + self.access_token}
 
     def _basic_login(self):
-        """Obtain a (new) access token from the vendor.
+        """Obtain a new access token from the vendor.
 
         First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials.
@@ -99,10 +99,11 @@ class EvohomeClient(object):                                                    
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
-            if not self._obtain_access_token(credentials):
-                # invalid refresh_token, silently try username/password instead
-                _LOGGER.warning("Invalid refresh_token, "
-                                "will try user credentials.")
+            try:
+                self._obtain_access_token(credentials)
+            except:
+                _LOGGER.warning(
+                    "Invalid refresh_token, will try user credentials.")
                 self.refresh_token = None
 
         if not self.refresh_token:
@@ -113,8 +114,7 @@ class EvohomeClient(object):                                                    
                            'Username': self.username,
                            'Password': self.password}
 
-            if not self._obtain_access_token(credentials):
-                raise ValueError("Bad Username/Password, unable to continue.")
+            self._obtain_access_token(credentials)
 
         _LOGGER.debug("refresh_token = %s", self.refresh_token)
         _LOGGER.debug("access_token = %s", self.access_token)
@@ -122,10 +122,6 @@ class EvohomeClient(object):                                                    
                       self.access_token_expires.strftime("%Y-%m-%d %H:%M:%S"))
 
     def _obtain_access_token(self, credentials):
-        """Get an access token using the supplied credentials.
-
-        Return False if this is not possible.
-        """
         url = 'https://tccna.honeywell.com/Auth/OAuth/Token'
         payload = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -138,13 +134,12 @@ class EvohomeClient(object):                                                    
 
         response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH)
 
-        if response.status_code == requests.codes.bad_request:                   # pylint: disable=no-member
-            if 'error' in response.text:  # don't use response.json() here!
-                return response.json()['error'] != 'invalid_grant'
-            raise requests.HTTPError(
-                "Unable to obtain an Access Token: ", response.text)
-
-        response.raise_for_status()
+        if response.status_code != requests.codes.ok:                            # pylint: disable=no-member
+            if response.text:  # if there is a message, then raise with it
+                raise requests.HTTPError(
+                    "Unable to obtain an Access Token: ", response.text)
+        else:  # raise all others
+            response.raise_for_status()
 
         try:  # validate the access token
             # this may cause a ValueError
@@ -158,13 +153,13 @@ class EvohomeClient(object):                                                    
             )
             self.refresh_token = response_json['refresh_token']
 
-        except KeyError as error:
-            raise KeyError("Unable to obtain an Access Token: ", response_json)
+        except KeyError:
+            raise KeyError("Unable to obtain an Access Token, response was: ",
+                response_json)
 
-        except ValueError as error:
-            raise ValueError("Unable to obtain an Access Token: ", error)
-
-        return True
+        except ValueError:
+            raise ValueError("Unable to obtain an Access Token, response was: ",
+                response.text)
 
     def _get_location(self, location):
         if location is None:
