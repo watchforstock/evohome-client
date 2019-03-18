@@ -91,7 +91,7 @@ class ControlSystem(object):                                                    
 
     def temperatures(self):
         """Return a generator with the details of each zone."""
-        status = self.location.status()
+        self.location.status()
 
         if self.hotwater:
             yield {
