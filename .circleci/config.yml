@@ -33,6 +33,7 @@ jobs: # A basic unit of work in a run
           name: Test
           command: |
             pylint --disable=C0301 evohomeclient
+            pylint --disable=C0301 evohomeclient2
             nosetests --xunit-file=test-results/junit.xml
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
