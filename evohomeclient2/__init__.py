@@ -109,7 +109,7 @@ class EvohomeClient(object):                                                    
 
             try:
                 self._obtain_access_token(credentials)
-            except (requests.HTTPError, KeyError, ValueError):
+            except AuthenticationError:
                 _LOGGER.warning(
                     "Invalid refresh_token, will try user credentials.")
                 self.refresh_token = None
