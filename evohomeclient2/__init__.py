@@ -98,24 +98,24 @@ class EvohomeClient(object):                                                    
         First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials.
         """
-        _LOGGER.debug("No/Expired/Invalid access_token, re-authenticating...")
+        _LOGGER.debug("No/Expired/Invalid access_token, re-authenticating.")
         self.access_token = self.access_token_expires = None
 
         if self.refresh_token:
-            _LOGGER.debug("Trying refresh_token...")
+            _LOGGER.debug("Authenticating with the refresh_token...")
             credentials = {'grant_type': "refresh_token",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous",
                            'refresh_token': self.refresh_token}
 
             try:
                 self._obtain_access_token(credentials)
-            except (requests.HTTPError, KeyError, ValueError):
+            except AuthenticationError:
                 _LOGGER.warning(
-                    "Invalid refresh_token, will try user credentials.")
+                    "Invalid refresh_token (will try user credentials).")
                 self.refresh_token = None
 
         if not self.refresh_token:
-            _LOGGER.debug("Trying user credentials...")
+            _LOGGER.debug("Authenticating with the user credentials...")
             credentials = {'grant_type': "password",
                            'scope': "EMEA-V1-Basic EMEA-V1-Anonymous "
                                     "EMEA-V1-Get-Current-User-Account",
