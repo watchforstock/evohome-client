@@ -15,6 +15,8 @@ except ImportError:
 
 from .location import Location
 
+HTTP_UNAUTHORIZED = 401
+
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
 
@@ -78,7 +80,17 @@ class EvohomeClient(object):                                                    
         self._login()
 
     def _login(self):
-        self.user_account()
+        try:  # the cached access_token may be valid, but is not authorized
+            self.user_account()
+        except requests.HTTPError as err:
+            if err.status_code == HTTP_UNAUTHORIZED and self.access_token:
+                _LOGGER.warning(
+                    "Unauthorized access_token (will try user credentials)."
+                )
+                self.access_token = None
+                self.user_account()
+            else:
+                raise
         self.installation()
 
     def _headers(self):
