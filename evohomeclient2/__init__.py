@@ -110,7 +110,7 @@ class EvohomeClient(object):                                                    
         First, try using the refresh_token, if one is available, otherwise
         authenticate using the user credentials.
         """
-        _LOGGER.debug("No/Expired/Invalid access_token, re-authenticating.")
+        _LOGGER.debug("Absent/Expired access_token, re-authenticating.")
         self.access_token = self.access_token_expires = None
 
         if self.refresh_token:
