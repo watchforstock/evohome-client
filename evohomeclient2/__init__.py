@@ -83,7 +83,7 @@ class EvohomeClient(object):                                                    
         try:  # the cached access_token may be valid, but is not authorized
             self.user_account()
         except requests.HTTPError as err:
-            if err.status_code == HTTP_UNAUTHORIZED and self.access_token:
+            if err.response.status_code == HTTP_UNAUTHORIZED and self.access_token:
                 _LOGGER.warning(
                     "Unauthorized access_token (will try re-authenticating)."
                 )
