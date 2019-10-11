@@ -85,7 +85,7 @@ class EvohomeClient(object):                                                    
         except requests.HTTPError as err:
             if err.status_code == HTTP_UNAUTHORIZED and self.access_token:
                 _LOGGER.warning(
-                    "Unauthorized access_token (will try user credentials)."
+                    "Unauthorized access_token (will try re-authenticating)."
                 )
                 self.access_token = None
                 self.user_account()
