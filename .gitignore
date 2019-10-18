@@ -8,6 +8,7 @@ test.py
 
 # Distribution / packaging
 .Python
+venv/
 env/
 bin/
 build/
