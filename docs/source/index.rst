@@ -15,7 +15,7 @@ Install the evohome client library:
 
 .. code-block:: none
 
-    pip install ./evohome-client
+    pip install evohomeclient
 
 Versions
 --------
