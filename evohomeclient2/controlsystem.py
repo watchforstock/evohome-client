@@ -58,6 +58,10 @@ class ControlSystem(object):                                                    
         )
         response.raise_for_status()
 
+    def set_status(self, mode, until=None):
+        """Set the system to a mode, either indefinitely, or for a set time."""
+        self._set_status(mode, until)
+
     def set_status_normal(self):
         """Set the system into normal mode."""
         self._set_status("Auto")
