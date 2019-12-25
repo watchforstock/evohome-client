@@ -82,7 +82,7 @@ class Zone(ZoneBase):
         else:
             data = {"SetpointMode": "TemporaryOverride",
                     "HeatSetpointValue": temperature,
-                    "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:00Z')}
+                    "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
 
         self._set_heat_setpoint(data)
 
