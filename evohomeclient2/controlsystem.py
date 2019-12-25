@@ -47,7 +47,7 @@ class ControlSystem(object):                                                    
         else:
             data = {
                 "SystemMode": mode,
-                "TimeUntil": "%sT00:00:00Z" % until.strftime('%Y-%m-%d'),
+                "TimeUntil": "%s:00Z" % until.strftime('%Y-%m-%dT%H:%M'),
                 "Permanent": False
             }
 
