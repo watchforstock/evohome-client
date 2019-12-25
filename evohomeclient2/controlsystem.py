@@ -47,7 +47,7 @@ class ControlSystem(object):                                                    
         else:
             data = {
                 "SystemMode": mode,
-                "TimeUntil": "%sT00:00:00Z" % until.strftime('%Y-%m-%d'),
+                "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "Permanent": False
             }
 
@@ -57,6 +57,10 @@ class ControlSystem(object):                                                    
             data=json.dumps(data), headers=headers
         )
         response.raise_for_status()
+
+    def set_status(self, mode, until=None):
+        """Set the system to a mode, either indefinitely, or for a set time."""
+        self._set_status(mode, until)
 
     def set_status_normal(self):
         """Set the system into normal mode."""
