@@ -4,13 +4,13 @@ import json
 import requests
 
 
-class ZoneBase(object):                                                          # pylint: disable=useless-object-inheritance
+class ZoneBase(object):  # pylint: disable=useless-object-inheritance
     """Provides the base for Zones"""
 
     def __init__(self, client):
         self.client = client
         self.name = None
-        self.zoneId = None                                                       # pylint: disable=invalid-name
+        self.zoneId = None  # pylint: disable=invalid-name
         self.zone_type = None
 
     def schedule(self):
@@ -18,17 +18,17 @@ class ZoneBase(object):                                                         
         response = requests.get(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/%s/%s/schedule" % (self.zone_type, self.zoneId),
-            headers=self.client._headers()                                       # pylint: disable=no-member,protected-access
+            headers=self.client._headers(),  # pylint: disable=no-member,protected-access
         )
         response.raise_for_status()
 
         mapping = [
-            ('dailySchedules', 'DailySchedules'),
-            ('dayOfWeek', 'DayOfWeek'),
-            ('temperature', 'TargetTemperature'),
-            ('timeOfDay', 'TimeOfDay'),
-            ('switchpoints', 'Switchpoints'),
-            ('dhwState', 'DhwState'),
+            ("dailySchedules", "DailySchedules"),
+            ("dayOfWeek", "DayOfWeek"),
+            ("temperature", "TargetTemperature"),
+            ("timeOfDay", "TimeOfDay"),
+            ("switchpoints", "Switchpoints"),
+            ("dhwState", "DhwState"),
         ]
 
         response_data = response.text
@@ -37,8 +37,8 @@ class ZoneBase(object):                                                         
 
         data = json.loads(response_data)
         # change the day name string to a number offset (0 = Monday)
-        for day_of_week, schedule in enumerate(data['DailySchedules']):
-            schedule['DayOfWeek'] = day_of_week
+        for day_of_week, schedule in enumerate(data["DailySchedules"]):
+            schedule["DayOfWeek"] = day_of_week
         return data
 
     def set_schedule(self, zone_info):
@@ -50,13 +50,14 @@ class ZoneBase(object):                                                         
         except ValueError as error:
             raise ValueError("zone_info must be valid JSON: ", error)
 
-        headers = dict(self.client._headers())                                   # pylint: disable=protected-access
-        headers['Content-Type'] = 'application/json'
+        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        headers["Content-Type"] = "application/json"
 
         response = requests.put(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/%s/%s/schedule" % (self.zone_type, self.zoneId),
-            data=zone_info, headers=headers
+            data=zone_info,
+            headers=headers,
         )
         response.raise_for_status()
 
@@ -71,18 +72,22 @@ class Zone(ZoneBase):
 
         self.__dict__.update(data)
 
-        self.zone_type = 'temperatureZone'
+        self.zone_type = "temperatureZone"
 
     def set_temperature(self, temperature, until=None):
         """Sets the temperature of the given zone"""
         if until is None:
-            data = {"SetpointMode": "PermanentOverride",
-                    "HeatSetpointValue": temperature,
-                    "TimeUntil": None}
+            data = {
+                "SetpointMode": "PermanentOverride",
+                "HeatSetpointValue": temperature,
+                "TimeUntil": None,
+            }
         else:
-            data = {"SetpointMode": "TemporaryOverride",
-                    "HeatSetpointValue": temperature,
-                    "TimeUntil": until.strftime('%Y-%m-%dT%H:%M:%SZ')}
+            data = {
+                "SetpointMode": "TemporaryOverride",
+                "HeatSetpointValue": temperature,
+                "TimeUntil": until.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            }
 
         self._set_heat_setpoint(data)
 
@@ -92,16 +97,18 @@ class Zone(ZoneBase):
             "/temperatureZone/%s/heatSetpoint" % self.zoneId
         )
 
-        headers = dict(self.client._headers())                                   # pylint: disable=protected-access
-        headers['Content-Type'] = 'application/json'
+        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        headers["Content-Type"] = "application/json"
 
         response = requests.put(url, json.dumps(data), headers=headers)
         response.raise_for_status()
 
     def cancel_temp_override(self):
         """Cancels an override to the zone temperature"""
-        data = {"SetpointMode": "FollowSchedule",
-                "HeatSetpointValue": 0.0,
-                "TimeUntil": None}
+        data = {
+            "SetpointMode": "FollowSchedule",
+            "HeatSetpointValue": 0.0,
+            "TimeUntil": None,
+        }
 
         self._set_heat_setpoint(data)

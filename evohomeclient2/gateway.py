@@ -2,7 +2,9 @@
 from .controlsystem import ControlSystem
 
 
-class Gateway(object):                                                           # pylint: disable=too-few-public-methods,useless-object-inheritance
+class Gateway(
+    object
+):  # pylint: disable=too-few-public-methods,useless-object-inheritance
     """Provides handling of a gateway"""
 
     def __init__(self, client, location, data=None):
@@ -12,9 +14,9 @@ class Gateway(object):                                                          
         self.control_systems = {}
 
         if data is not None:
-            self.__dict__.update(data['gatewayInfo'])
+            self.__dict__.update(data["gatewayInfo"])
 
-            for cs_data in data['temperatureControlSystems']:
+            for cs_data in data["temperatureControlSystems"]:
                 control_system = ControlSystem(client, location, self, cs_data)
                 self._control_systems.append(control_system)
                 self.control_systems[control_system.systemId] = control_system
