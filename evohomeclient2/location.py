@@ -28,11 +28,12 @@ class Location(
 
     def status(self):
         """Retrieve the location status."""
+        # pylint: disable=protected-access
         response = requests.get(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
             "location/%s/status?includeTemperatureControlSystems=True"
             % self.locationId,
-            headers=self.client._headers(),  # pylint: disable=protected-access
+            headers=self.client._headers(),
         )
         response.raise_for_status()
         data = response.json()
