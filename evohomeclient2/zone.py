@@ -1,11 +1,11 @@
-"""Provides handling of individual zones."""
+"""Provide handling of individual zones."""
 import json
 
 import requests
 
 
 class ZoneBase(object):  # pylint: disable=useless-object-inheritance
-    """Provides the base for Zones."""
+    """Provide the base for Zones."""
 
     def __init__(self, client):
         """Initialise the class."""
@@ -16,6 +16,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
 
     def schedule(self):
         """Get the schedule for the given zone."""
+        # pylint: disable=protected-access
         response = requests.get(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
             % (self.zone_type, self.zoneId),
@@ -45,13 +46,14 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
     def set_schedule(self, zone_info):
         """Set the schedule for this zone."""
         # must only POST json, otherwise server API handler raises exceptions
+        # pylint: disable=protected-access
         try:
             json.loads(zone_info)
 
         except ValueError as error:
             raise ValueError("zone_info must be valid JSON: ", error)
 
-        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
 
         response = requests.put(
@@ -94,6 +96,7 @@ class Zone(ZoneBase):
         self._set_heat_setpoint(data)
 
     def _set_heat_setpoint(self, data):
+        # pylint: disable=protected-access
         url = (
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/temperatureZone/%s/heatSetpoint" % self.zoneId
