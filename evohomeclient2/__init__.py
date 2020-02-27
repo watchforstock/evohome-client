@@ -89,6 +89,7 @@ class EvohomeClient(
         self._login()
 
     def _login(self):
+        """Authenticate with the server."""
         try:  # the cached access_token may be valid, but is not authorized
             self.user_account()
         except requests.HTTPError as err:
@@ -206,20 +207,17 @@ class EvohomeClient(
 
     def _get_single_heating_system(self):
         # This allows a shortcut for some systems
+        # pylint: disable=protected-access
         if len(self.locations) != 1:
             raise Exception("More (or less) than one location available")
 
-        if len(self.locations[0]._gateways) != 1:  # pylint: disable=protected-access
+        if len(self.locations[0]._gateways) != 1:
             raise Exception("More (or less) than one gateway available")
 
-        if (
-            len(self.locations[0]._gateways[0]._control_systems) != 1
-        ):  # pylint: disable=protected-access
+        if len(self.locations[0]._gateways[0]._control_systems) != 1:
             raise Exception("More (or less) than one control system available")
 
-        return (
-            self.locations[0]._gateways[0]._control_systems[0]
-        )  # pylint: disable=protected-access
+        return self.locations[0]._gateways[0]._control_systems[0]
 
     def user_account(self):
         """Return the user account information."""
@@ -239,8 +237,8 @@ class EvohomeClient(
 
         url = (
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
-            "/installationInfo?userId=%s"
-            "&includeTemperatureControlSystems=True" % self.account_info["userId"]
+            "/installationInfo?userId=%s&includeTemperatureControlSystems=True"
+            % self.account_info["userId"]
         )
 
         response = requests.get(url, headers=self._headers())
@@ -271,7 +269,7 @@ class EvohomeClient(
         return response.json()
 
     def gateway(self):
-        """Return the detail of the gateway."""
+        """Return the details of the gateway."""
         url = "https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway"
 
         response = requests.get(url, headers=self._headers())
