@@ -1,6 +1,8 @@
 """Tests for evohomeclient package"""
 from datetime import datetime
+
 import requests_mock
+
 from . import EvohomeClient
 
 UNAUTH_RESPONSE = """[{

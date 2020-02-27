@@ -1,5 +1,6 @@
 """Test evohomeclient2"""
 import requests_mock
+
 from . import EvohomeClient
 
 INSTALLATION_DATA = """[{

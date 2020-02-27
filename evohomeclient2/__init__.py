@@ -2,10 +2,12 @@
 
 Further information at: https://evohome-client.readthedocs.io
 """
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 
 import requests
+
+from .location import Location
 
 try:
     import http.client as http_client
@@ -13,7 +15,6 @@ except ImportError:
     # Python 2
     import httplib as http_client
 
-from .location import Location
 
 HTTP_UNAUTHORIZED = 401
 
@@ -54,10 +55,10 @@ class EvohomeClient(
         username,
         password,
         debug=False,
-        refresh_token=None,  # pylint: disable=too-many-arguments
+        refresh_token=None,
         access_token=None,
         access_token_expires=None,
-    ):
+    ):  # pylint: disable=too-many-arguments
         """Construct the EvohomeClient object."""
         if debug is True:
             _LOGGER.setLevel(logging.DEBUG)
@@ -100,6 +101,7 @@ class EvohomeClient(
                 self.user_account()
             else:
                 raise
+
         self.installation()
 
     def _headers(self):
@@ -174,6 +176,7 @@ class EvohomeClient(
             msg = "Unable to obtain an Access Token"
             if response.text:  # if there is a message, then raise with it
                 msg = msg + ", hint: " + response.text
+
             raise AuthenticationError(msg)
 
         try:  # the access token _should_ be valid...
@@ -245,6 +248,7 @@ class EvohomeClient(
         response.raise_for_status()
 
         self.installation_info = response.json()
+
         self.system_id = self.installation_info[0]["gateways"][0][
             "temperatureControlSystems"
         ][0]["systemId"]

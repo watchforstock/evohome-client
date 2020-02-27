@@ -1,12 +1,12 @@
-"""evohomeclient2 provides a client for the oiginal Evohome API.
+"""evohomeclient provides a client for the oiginal Evohome API.
 
 Further information at: https://evohome-client.readthedocs.io
 """
 import codecs
 import json
 import logging
-import time
 import sys
+import time
 
 import requests
 
@@ -57,8 +57,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
             http_client.HTTPConnection.debuglevel = 1
         else:
             _LOGGER.debug(
-                "Debug mode is not explicitly enabled "
-                "(but may be enabled elsewhere)."
+                "Debug mode is not explicitly enabled (but may be enabled elsewhere)."
             )
 
         self.username = username
@@ -88,8 +87,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
             session_id = self.user_data["sessionId"]
 
             url = (
-                self.hostname + "/WebAPI/api/locations"
-                "?userId=%s&allData=True" % user_id
+                self.hostname + "/WebAPI/api/locations?userId=%s&allData=True" % user_id
             )
             self.headers["sessionId"] = session_id
 
@@ -127,6 +125,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
     def temperatures(self, force_refresh=False):
         """Retrieve the current details for each zone. Returns a generator."""
         self._populate_full_data(force_refresh)
+
         for device in self.full_data["devices"]:
             set_point = 0
             status = ""
@@ -137,6 +136,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
                 status = device["thermostat"]["changeableValues"]["heatSetpoint"][
                     "status"
                 ]
+
             else:
                 status = device["thermostat"]["changeableValues"]["status"]
             yield {
@@ -166,7 +166,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
 
     def _get_task_status(self, task_id):
         self._populate_full_data()
-        url = self.hostname + "/WebAPI/api/commTasks" "?commTaskId=%s" % task_id
+        url = self.hostname + "/WebAPI/api/commTasks?commTaskId=%s" % task_id
 
         response = self._do_request("get", url)
 
@@ -227,8 +227,8 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
     def _set_status(self, status, until=None):
         self._populate_full_data()
         url = (
-            self.hostname + "/WebAPI/api/evoTouchSystems"
-            "?locationId=%s" % self.location_id
+            self.hostname
+            + "/WebAPI/api/evoTouchSystems?locationId=%s" % self.location_id
         )
 
         if until is None:
@@ -280,8 +280,9 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         device_id = self._get_device_id(zone)
 
         url = (
-            self.hostname + "/WebAPI/api/devices"
-            "/%s/thermostat/changeableValues/heatSetpoint" % device_id
+            self.hostname
+            + "/WebAPI/api/devices/%s/thermostat/changeableValues/heatSetpoint"
+            % device_id
         )
 
         response = self._do_request("put", url, json.dumps(data))
@@ -313,7 +314,6 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         for device in self.full_data["devices"]:
             if device["thermostatModelType"] == "DOMESTIC_HOT_WATER":
                 return device["deviceID"]
-        return None
 
     def _set_dhw(self, status="Scheduled", mode=None, next_time=None):
         """Set DHW to On, Off or Auto, either indefinitely, or until a
