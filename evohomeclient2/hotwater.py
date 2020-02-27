@@ -10,7 +10,7 @@ class HotWater(ZoneBase):
     """Provide handling of the hot water zone."""
 
     def __init__(self, client, data):
-        """Initialise teh class."""
+        """Initialise the class."""
         super(HotWater, self).__init__(client)
 
         self.dhwId = None  # pylint: disable=invalid-name
@@ -22,8 +22,10 @@ class HotWater(ZoneBase):
         self.zone_type = "domesticHotWater"
 
     def _set_dhw(self, data):
-        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
+
         url = (
             "https://tccna.honeywell.com/WebAPI/emea/api/v1"
             "/domesticHotWater/%s/state" % self.dhwId
