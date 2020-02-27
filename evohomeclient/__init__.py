@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
-    """Provides a client to access the Honeywell Evohome system"""
+    """Provide a client to access the Honeywell Evohome system."""
 
     # pylint: disable=too-many-instance-attributes,too-many-arguments
 
@@ -40,7 +40,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         user_data=None,
         hostname="https://tccna.honeywell.com",
     ):
-        """Constructor. Takes the username and password for the service.
+        """Take the username and password for the service.
 
         If user_data is given then this will be used to try and reduce the number of
         calls to the authentication service which is known to be rate limited.
@@ -122,7 +122,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         return self.user_data
 
     def temperatures(self, force_refresh=False):
-        """Retrieve the current details for each zone. Returns a generator."""
+        """Retrieve the current details for each zone."""
         self._populate_full_data(force_refresh)
 
         for device in self.full_data["devices"]:
@@ -149,15 +149,15 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
             }
 
     def get_modes(self, zone):
-        """Returns the set of modes the device can be assigned."""
+        """Return the set of modes the device can be assigned."""
         self._populate_full_data()
         device = self._get_device(zone)
         return device["thermostat"]["allowedModes"]
 
     def _get_device(self, zone):
         if isinstance(zone, str) or (
-            IS_PY2 and isinstance(zone, basestring)
-        ):  # noqa: F821; pylint: disable=undefined-variable
+            IS_PY2 and isinstance(zone, basestring)  # noqa: F821
+        ):
             device = self.named_devices[zone]
         else:
             device = self.devices[zone]
@@ -246,27 +246,27 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
             time.sleep(1)
 
     def set_status_normal(self):
-        """Sets the system to normal operation."""
+        """Set the system to normal operation."""
         self._set_status("Auto")
 
     def set_status_custom(self, until=None):
-        """Sets the system to the custom programme."""
+        """Set the system to the custom programme."""
         self._set_status("Custom", until)
 
     def set_status_eco(self, until=None):
-        """Sets the system to the eco mode."""
+        """Set the system to the eco mode."""
         self._set_status("AutoWithEco", until)
 
     def set_status_away(self, until=None):
-        """Sets the system to the away mode."""
+        """Set the system to the away mode."""
         self._set_status("Away", until)
 
     def set_status_dayoff(self, until=None):
-        """Sets the system to the day off mode."""
+        """Set the system to the day off mode."""
         self._set_status("DayOff", until)
 
     def set_status_heatingoff(self, until=None):
-        """Sets the system to the heating off mode."""
+        """Set the system to the heating off mode."""
         self._set_status("HeatingOff", until)
 
     def _get_device_id(self, zone):
@@ -292,7 +292,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
             time.sleep(1)
 
     def set_temperature(self, zone, temperature, until=None):
-        """Sets the temperature of the given zone."""
+        """Set the temperature of the given zone."""
         if until is None:
             data = {"Value": temperature, "Status": "Hold", "NextTime": None}
         else:
@@ -305,7 +305,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         self._set_heat_setpoint(zone, data)
 
     def cancel_temp_override(self, zone):
-        """Removes an existing temperature override."""
+        """Remove an existing temperature override."""
         data = {"Value": None, "Status": "Scheduled", "NextTime": None}
         self._set_heat_setpoint(zone, data)
 
@@ -348,7 +348,6 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         its target temperature.  After the specified time, it will revert to its
         scheduled behaviour.
         """
-
         time_until = None if until is None else until.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         self._set_dhw(status="Hold", mode="DHWOn", next_time=time_until)
@@ -359,7 +358,6 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         When Off, the DHW controller will ignore its target temperature. After the
         specified time, it will revert to its scheduled behaviour.
         """
-
         time_until = None if until is None else until.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         self._set_dhw(status="Hold", mode="DHWOff", next_time=time_until)

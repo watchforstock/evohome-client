@@ -48,7 +48,7 @@ class AuthenticationError(Exception):
 class EvohomeClient(
     object
 ):  # pylint: disable=too-many-instance-attributes,useless-object-inheritance
-    """Provides access to the v2 Evohome API."""
+    """Provide access to the v2 Evohome API."""
 
     def __init__(
         self,
@@ -71,8 +71,7 @@ class EvohomeClient(
             http_client.HTTPConnection.debuglevel = 1
         else:
             _LOGGER.debug(
-                "Debug mode is not explicitly enabled "
-                "(but may be enabled elsewhere)."
+                "Debug mode is not explicitly enabled (but may be enabled elsewhere)."
             )
 
         self.username = username

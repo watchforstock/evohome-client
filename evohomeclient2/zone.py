@@ -1,24 +1,25 @@
-"""Provides handling of individual zones"""
+"""Provides handling of individual zones."""
 import json
 
 import requests
 
 
 class ZoneBase(object):  # pylint: disable=useless-object-inheritance
-    """Provides the base for Zones"""
+    """Provides the base for Zones."""
 
     def __init__(self, client):
+        """Initialise the class."""
         self.client = client
         self.name = None
         self.zoneId = None  # pylint: disable=invalid-name
         self.zone_type = None
 
     def schedule(self):
-        """Gets the schedule for the given zone"""
+        """Get the schedule for the given zone."""
         response = requests.get(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
-            "/%s/%s/schedule" % (self.zone_type, self.zoneId),
-            headers=self.client._headers(),  # pylint: disable=no-member,protected-access
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
+            % (self.zone_type, self.zoneId),
+            headers=self.client._headers(),
         )
         response.raise_for_status()
 
@@ -42,7 +43,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
         return data
 
     def set_schedule(self, zone_info):
-        """Sets the schedule for this zone"""
+        """Set the schedule for this zone."""
         # must only POST json, otherwise server API handler raises exceptions
         try:
             json.loads(zone_info)
@@ -68,6 +69,7 @@ class Zone(ZoneBase):
     """Provides the access to an individual zone."""
 
     def __init__(self, client, data):
+        """Initialise the class."""
         super(Zone, self).__init__(client)
 
         self.__dict__.update(data)
@@ -75,7 +77,7 @@ class Zone(ZoneBase):
         self.zone_type = "temperatureZone"
 
     def set_temperature(self, temperature, until=None):
-        """Sets the temperature of the given zone"""
+        """Set the temperature of the given zone."""
         if until is None:
             data = {
                 "SetpointMode": "PermanentOverride",
@@ -104,7 +106,7 @@ class Zone(ZoneBase):
         response.raise_for_status()
 
     def cancel_temp_override(self):
-        """Cancels an override to the zone temperature"""
+        """Cancel an override to the zone temperature."""
         data = {
             "SetpointMode": "FollowSchedule",
             "HeatSetpointValue": 0.0,

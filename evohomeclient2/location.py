@@ -1,4 +1,4 @@
-"""Provides handling of a location."""
+"""Provide handling of a location."""
 import requests
 
 from .gateway import Gateway
@@ -7,9 +7,10 @@ from .gateway import Gateway
 class Location(
     object
 ):  # pylint: disable=too-few-public-methods,useless-object-inheritance
-    """Provides handling of a location."""
+    """Provide handling of a location."""
 
     def __init__(self, client, data=None):
+        """Initialise the class."""
         self.client = client
         self._gateways = []
         self.gateways = {}
@@ -26,7 +27,7 @@ class Location(
             self.status()
 
     def status(self):
-        """Retrieves the location status."""
+        """Retrieve the location status."""
         response = requests.get(
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
             "location/%s/status?includeTemperatureControlSystems=True"
