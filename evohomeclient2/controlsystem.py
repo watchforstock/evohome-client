@@ -42,7 +42,8 @@ class ControlSystem(
                 self.hotwater = HotWater(client, data["dhw"])
 
     def _set_status(self, mode, until=None):
-        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
 
         if until is None:
@@ -102,13 +103,12 @@ class ControlSystem(
         self.location.status()
 
         if self.hotwater:
+            # pylint: disable=no-member
             yield {
                 "thermostat": "DOMESTIC_HOT_WATER",
                 "id": self.hotwater.dhwId,
                 "name": "",
-                "temp": self.hotwater.temperatureStatus[
-                    "temperature"
-                ],  # pylint: disable=no-member
+                "temp": self.hotwater.temperatureStatus["temperature"],
                 "setpoint": "",
             }
 
