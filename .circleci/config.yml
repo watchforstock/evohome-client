@@ -24,7 +24,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            sudo pip install nose requests_mock coverage pylint
+            sudo pip install nose requests_mock coverage black
       - run:
           command: |
             mkdir test-results
@@ -32,8 +32,8 @@ jobs: # A basic unit of work in a run
       - run:
           name: Test
           command: |
-            pylint --disable=C0301 evohomeclient
-            pylint --disable=C0301 evohomeclient2
+            black --safe --quiet evohomeclient
+            black --safe --quiet evohomeclient2
             nosetests --xunit-file=test-results/junit.xml
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
@@ -47,7 +47,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            sudo pip install nose requests_mock coverage pylint twine
+            sudo pip install nose requests_mock coverage twine
       - run:
           command: |
             pip install requests
@@ -88,13 +88,13 @@ workflows:
   build-and-deploy:
     jobs:
       - build:
-          filters:  # required since `deploy` has tag filters AND requires `build`
+          filters: # required since `deploy` has tag filters AND requires `build`
             tags:
               only: /.*/
       - test:
           requires:
             - build
-          filters:  # required since `deploy` has tag filters AND requires `build`
+          filters: # required since `deploy` has tag filters AND requires `build`
             tags:
               only: /.*/
       - deploy:
