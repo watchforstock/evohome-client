@@ -10,5 +10,3 @@ It provides support for **Evohome** and the **Round Thermostat**.  It supports o
 This client uses the [requests](https://pypi.org/project/requests/) library. If you prefer an async-friendly client, [evohome-async](https://github.com/zxdavb/evohome-async) has been ported to use [aiohttp](https://pypi.org/project/aiohttp/) instead.
 
 Documentation (in progress) at http://evohome-client.readthedocs.org/en/latest/
-
-Provides Evohome support for Home Assistant (and other automation platforms), see http://home-assistant.io/components/evohome/
