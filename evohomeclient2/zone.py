@@ -57,8 +57,8 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
         headers["Content-Type"] = "application/json"
 
         response = requests.put(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
-            "/%s/%s/schedule" % (self.zone_type, self.zoneId),
+            "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
+            % (self.zone_type, self.zoneId),
             data=zone_info,
             headers=headers,
         )
@@ -102,7 +102,7 @@ class Zone(ZoneBase):
             "/temperatureZone/%s/heatSetpoint" % self.zoneId
         )
 
-        headers = dict(self.client._headers())  # pylint: disable=protected-access
+        headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
 
         response = requests.put(url, json.dumps(data), headers=headers)
