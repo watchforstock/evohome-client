@@ -2,7 +2,6 @@
 
 *.json
 *.out
-*.txt
 tokens*
 .secrets/
 .vscode/
