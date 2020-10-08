@@ -4,7 +4,7 @@ import sys
 from setuptools import setup
 from setuptools.command.install import install
 
-VERSION = "0.3.4"
+VERSION = "0.3.5"
 
 
 class VerifyVersionCommand(install):
@@ -31,9 +31,13 @@ setup(
     author="Andrew Stock",
     author_email="evohome@andrew-stock.com",
     license="Apache 2",
-    classifiers=["Development Status :: 3 - Alpha",],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+    ],
     keywords=["evohome"],
     packages=["evohomeclient", "evohomeclient2"],
     install_requires=["requests"],
-    cmdclass={"verify": VerifyVersionCommand,},
+    cmdclass={
+        "verify": VerifyVersionCommand,
+    },
 )
