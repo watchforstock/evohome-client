@@ -66,8 +66,8 @@ class HotWater(ZoneBase):
         self._set_dhw(data)
 
 
-    def get_dhw(self):
-        """Gets the DHW status."""
+    def get_dhw_state(self):
+        """Gets the DHW state."""
         url = (
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
             "domesticHotWater/%s/status?" % self.dhwId
