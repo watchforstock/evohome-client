@@ -37,7 +37,7 @@ Get hot water status
 
     client = EvohomeClient(username, password)
  
-    dhw = client.locations[0]._gateways[0]._control_systems[0].hotwater.get_dhw()
+    dhw = client.locations[0]._gateways[0]._control_systems[0].hotwater.get_dhw_status()
 
     temp = dhw['temperatureStatus']['temperature']
     status = dhw['stateStatus']['state']
