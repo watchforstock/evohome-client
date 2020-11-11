@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9c55b0d5-8c60-445f-8e2d-fa7f652756fe}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>evohomeclient2\module1.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="LICENSE.txt" />
+    <Content Include="requirements-dev.txt" />
+    <Content Include="requirements.txt" />
+    <Content Include="tox.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="docs\source\conf.py" />
+    <Compile Include="evohomeclient2\controlsystem.py" />
+    <Compile Include="evohomeclient2\gateway.py" />
+    <Compile Include="evohomeclient2\hotwater.py" />
+    <Compile Include="evohomeclient2\location.py" />
+    <Compile Include="evohomeclient2\tests.py" />
+    <Compile Include="evohomeclient2\zone.py" />
+    <Compile Include="evohomeclient2\__init__.py" />
+    <Compile Include="evohomeclient\tests.py" />
+    <Compile Include="evohomeclient\__init__.py" />
+    <Compile Include="setup.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="docs\" />
+    <Folder Include="docs\source" />
+    <Folder Include="evohomeclient" />
+    <Folder Include="evohomeclient2" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
