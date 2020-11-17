@@ -5,6 +5,7 @@ Further information at: https://evohome-client.readthedocs.io
 import logging
 from datetime import datetime, timedelta
 
+import time;
 import requests
 
 from .location import Location
@@ -177,7 +178,7 @@ class EvohomeClient(
             if response.text:  # if there is a message, then raise with it
                 msg = msg + ", hint: " + response.text
 
-            raise AuthenticationError(msg)
+            #raise AuthenticationError(msg)
 
         try:  # the access token _should_ be valid...
             # this may cause a ValueError
@@ -191,14 +192,10 @@ class EvohomeClient(
             self.refresh_token = response_json["refresh_token"]
 
         except KeyError:
-            raise AuthenticationError(
-                "Unable to obtain an Access Token, hint: " + response_json
-            )
+            print("AuthenticationError - Unable to obtain an Access Token, hint: " + response_json)
 
         except ValueError:
-            raise AuthenticationError(
-                "Unable to obtain an Access Token, hint: " + response.text
-            )
+            print("AuthenticationError - Unable to obtain an Access Token, hint: " + response.text)
 
     def _get_location(self, location):
         if location is None:

@@ -37,18 +37,15 @@ while True:
 
     try:
         client = EvohomeClient(username, password, debug=True)
-    except ValueError:
-        try:
-            client = EvohomeClient(username, password, debug=True)
-        except ValueError:
-            print("Error when connecting to internet, please try again")
 
+        for device in client.temperatures():
+            print(device)
+            insert_zones(thermostat=device['thermostat'], id=device['id'], name=device['name'], temp=device['temp'], setpoint=device['setpoint'])
 
-    for device in client.temperatures():
-        print(device)
-        insert_zones(thermostat=device['thermostat'], id=device['id'], name=device['name'], temp=device['temp'], setpoint=device['setpoint'])
+        connection.close();
+    except:
+        print("Error when connecting to internet");
+        connection.close();
 
-    connection.close();
-
-    print ("Going to sleep for 5 minutes")
-    time.sleep(300)
+    print ("Going to sleep for 2 minutes")
+    time.sleep(120)
