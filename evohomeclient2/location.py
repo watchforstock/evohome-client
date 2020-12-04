@@ -9,9 +9,10 @@ class Location(
 ):  # pylint: disable=too-few-public-methods,useless-object-inheritance
     """Provide handling of a location."""
 
-    def __init__(self, client, data=None):
+    def __init__(self, client, data=None, timeout=30):
         """Initialise the class."""
         self.client = client
+        self.timeout = timeout
         self._gateways = []
         self.gateways = {}
         self.locationId = None  # pylint: disable=invalid-name
@@ -34,6 +35,7 @@ class Location(
             "location/%s/status?includeTemperatureControlSystems=True"
             % self.locationId,
             headers=self.client._headers(),
+            timeout=self.timeout,
         )
         response.raise_for_status()
         data = response.json()

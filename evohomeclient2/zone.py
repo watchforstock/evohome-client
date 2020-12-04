@@ -7,9 +7,10 @@ import requests
 class ZoneBase(object):  # pylint: disable=useless-object-inheritance
     """Provide the base for Zones."""
 
-    def __init__(self, client):
+    def __init__(self, client, timeout=30):
         """Initialise the class."""
         self.client = client
+        self.timeout = timeout
         self.name = None
         self.zoneId = None  # pylint: disable=invalid-name
         self.zone_type = None
@@ -21,6 +22,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
             "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
             % (self.zone_type, self.zoneId),
             headers=self.client._headers(),
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -61,6 +63,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
             % (self.zone_type, self.zoneId),
             data=zone_info,
             headers=headers,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -105,7 +108,7 @@ class Zone(ZoneBase):
         headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
 
-        response = requests.put(url, json.dumps(data), headers=headers)
+        response = requests.put(url, json.dumps(data), headers=headers, timeout=self.timeout)
         response.raise_for_status()
 
     def cancel_temp_override(self):
