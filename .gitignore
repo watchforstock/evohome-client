@@ -148,3 +148,6 @@ dmypy.json
 
 test-reports/
 test.py
+
+# pipfile
+Pipfile.lock

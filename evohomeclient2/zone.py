@@ -108,7 +108,9 @@ class Zone(ZoneBase):
         headers = dict(self.client._headers())
         headers["Content-Type"] = "application/json"
 
-        response = requests.put(url, json.dumps(data), headers=headers, timeout=self.timeout)
+        response = requests.put(
+            url, json.dumps(data), headers=headers, timeout=self.timeout
+        )
         response.raise_for_status()
 
     def cancel_temp_override(self):

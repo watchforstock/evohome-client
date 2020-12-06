@@ -170,7 +170,9 @@ class EvohomeClient(
         }
         payload.update(credentials)  # merge the credentials into the payload
 
-        response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH, timeout=self.timeout)
+        response = requests.post(
+            url, data=payload, headers=HEADER_BASIC_AUTH, timeout=self.timeout
+        )
 
         try:
             response.raise_for_status()
@@ -311,6 +313,10 @@ class EvohomeClient(
     def temperatures(self):
         """Return the current zone temperatures and set points."""
         return self._get_single_heating_system().temperatures()
+
+    def schedules(self):
+        """Return the current zone schedules."""
+        return self._get_single_heating_system().schedules()
 
     def zone_schedules_backup(self, filename):
         """Back up the current system configuration to the given file."""
