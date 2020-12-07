@@ -58,6 +58,7 @@ class EvohomeClient(
         refresh_token=None,
         access_token=None,
         access_token_expires=None,
+        timeout=30,
     ):  # pylint: disable=too-many-arguments
         """Construct the EvohomeClient object."""
         if debug is True:
@@ -80,6 +81,8 @@ class EvohomeClient(
         self.refresh_token = refresh_token
         self.access_token = access_token
         self.access_token_expires = access_token_expires
+
+        self.timeout = timeout
 
         self.account_info = None
         self.locations = None
@@ -167,7 +170,7 @@ class EvohomeClient(
         }
         payload.update(credentials)  # merge the credentials into the payload
 
-        response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH)
+        response = requests.post(url, data=payload, headers=HEADER_BASIC_AUTH, timeout=self.timeout)
 
         try:
             response.raise_for_status()
@@ -225,7 +228,7 @@ class EvohomeClient(
 
         url = "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount"
 
-        response = requests.get(url, headers=self._headers())
+        response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()
 
         self.account_info = response.json()
@@ -241,7 +244,7 @@ class EvohomeClient(
             % self.account_info["userId"]
         )
 
-        response = requests.get(url, headers=self._headers())
+        response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()
 
         self.installation_info = response.json()
@@ -251,7 +254,7 @@ class EvohomeClient(
         ][0]["systemId"]
 
         for loc_data in self.installation_info:
-            self.locations.append(Location(self, loc_data))
+            self.locations.append(Location(self, loc_data, self.timeout))
 
         return self.installation_info
 
@@ -263,7 +266,7 @@ class EvohomeClient(
             % self._get_location(location)
         )
 
-        response = requests.get(url, headers=self._headers())
+        response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()
 
         return response.json()
@@ -272,7 +275,7 @@ class EvohomeClient(
         """Return the details of the gateway."""
         url = "https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway"
 
-        response = requests.get(url, headers=self._headers())
+        response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()
 
         return response.json()
