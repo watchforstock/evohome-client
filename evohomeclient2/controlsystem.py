@@ -111,6 +111,8 @@ class ControlSystem(
                 "name": "",
                 "temp": self.hotwater.temperatureStatus["temperature"],
                 "setpoint": "",
+                "setpointmode": "",
+                "setpointend": "1970-01-01T00:00:00Z",
             }
 
         for zone in self._zones:
@@ -120,10 +122,14 @@ class ControlSystem(
                 "name": zone.name,
                 "temp": None,
                 "setpoint": zone.setpointStatus["targetHeatTemperature"],
+                "setpointmode": zone.setpointStatus["setpointMode"],
+                "setpointend": "1970-01-01T00:00:00Z",
             }
 
             if zone.temperatureStatus["isAvailable"]:
                 zone_info["temp"] = zone.temperatureStatus["temperature"]
+            if zone.setpointStatus.get("until"):
+                zone_info["setpointend"] = zone.setpointStatus["until"]
             yield zone_info
 
     def zone_schedules_backup(self, filename):
