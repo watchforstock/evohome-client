@@ -113,6 +113,7 @@ class ControlSystem(
                 "setpoint": "",
                 "setpointmode": "",
                 "setpointend": "1970-01-01T00:00:00Z",
+                "activefaults": self.hotwater.activeFaults,
             }
 
         for zone in self._zones:
@@ -124,6 +125,7 @@ class ControlSystem(
                 "setpoint": zone.setpointStatus["targetHeatTemperature"],
                 "setpointmode": zone.setpointStatus["setpointMode"],
                 "setpointend": "1970-01-01T00:00:00Z",
+                "activefaults": zone.activeFaults,
             }
 
             if zone.temperatureStatus["isAvailable"]:
