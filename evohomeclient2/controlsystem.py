@@ -111,6 +111,9 @@ class ControlSystem(
                 "name": "",
                 "temp": self.hotwater.temperatureStatus["temperature"],
                 "setpoint": "",
+                "setpointmode": "",
+                "setpointend": "1970-01-01T00:00:00Z",
+                "activefaults": self.hotwater.activeFaults,
             }
 
         for zone in self._zones:
@@ -120,11 +123,34 @@ class ControlSystem(
                 "name": zone.name,
                 "temp": None,
                 "setpoint": zone.setpointStatus["targetHeatTemperature"],
+                "setpointmode": zone.setpointStatus["setpointMode"],
+                "setpointend": "1970-01-01T00:00:00Z",
+                "activefaults": zone.activeFaults,
             }
 
             if zone.temperatureStatus["isAvailable"]:
                 zone_info["temp"] = zone.temperatureStatus["temperature"]
+            if zone.setpointStatus.get("until"):
+                zone_info["setpointend"] = zone.setpointStatus["until"]
             yield zone_info
+
+    def schedules(self):
+        """Return a generator with the schedule of each zone."""
+        if self.hotwater:
+            _LOGGER.info("Retrieving DHW schedule: %s...", self.hotwater.zoneId)
+            yield {
+                "name": "Domestic Hot Water",
+                "id": self.hotwater.zoneId,
+                "schedule": self.hotwater.schedule(),
+            }
+
+        for zone in self._zones:
+            _LOGGER.info("Retrieving Zone schedule: %s - %s", zone.zoneId, zone.name)
+            yield {
+                "name": zone.name,
+                "id": zone.zoneId,
+                "schedule": zone.schedule(),
+            }
 
     def zone_schedules_backup(self, filename):
         """Backup all zones on control system to the given file."""
