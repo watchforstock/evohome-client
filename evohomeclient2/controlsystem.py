@@ -60,6 +60,7 @@ class ControlSystem(
             "/temperatureControlSystem/%s/mode" % self.systemId,
             data=json.dumps(data),
             headers=headers,
+            timeout=self.location.timeout,
         )
         response.raise_for_status()
 
