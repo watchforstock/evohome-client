@@ -56,7 +56,7 @@ class ControlSystem(
             }
 
         response = requests.put(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1"
             "/temperatureControlSystem/%s/mode" % self.systemId,
             data=json.dumps(data),
             headers=headers,

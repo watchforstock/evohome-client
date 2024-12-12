@@ -160,7 +160,7 @@ class EvohomeClient(
         )
 
     def _obtain_access_token(self, credentials):
-        url = "https://tccna.honeywell.com/Auth/OAuth/Token"
+        url = "https://tccna.resideo.com/Auth/OAuth/Token"
         payload = {
             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
             "Host": "rs.alarmnet.com/",
@@ -226,7 +226,7 @@ class EvohomeClient(
         """Return the user account information."""
         self.account_info = None
 
-        url = "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount"
+        url = "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount"
 
         response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()
@@ -239,7 +239,7 @@ class EvohomeClient(
         self.locations = []
 
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/location"
             "/installationInfo?userId=%s&includeTemperatureControlSystems=True"
             % self.account_info["userId"]
         )
@@ -261,7 +261,7 @@ class EvohomeClient(
     def full_installation(self, location=None):
         """Return the full details of the installation."""
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/location"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/location"
             "/%s/installationInfo?includeTemperatureControlSystems=True"
             % self._get_location(location)
         )
@@ -273,7 +273,7 @@ class EvohomeClient(
 
     def gateway(self):
         """Return the details of the gateway."""
-        url = "https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway"
+        url = "https://tccna.resideo.com/WebAPI/emea/api/v1/gateway"
 
         response = requests.get(url, headers=self._headers(), timeout=self.timeout)
         response.raise_for_status()

@@ -38,7 +38,7 @@ class EvohomeClient(object):  # pylint: disable=useless-object-inheritance
         password,
         debug=False,
         user_data=None,
-        hostname="https://tccna.honeywell.com",
+        hostname="https://tccna.resideo.com",
     ):
         """Take the username and password for the service.
 

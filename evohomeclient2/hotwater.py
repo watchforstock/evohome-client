@@ -24,7 +24,7 @@ class HotWater(ZoneBase):
         headers = dict(self.client._headers())                                   # pylint: disable=protected-access
         headers['Content-Type'] = 'application/json'
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1"
             "/domesticHotWater/%s/state" % self.dhwId
         )
 
@@ -69,7 +69,7 @@ class HotWater(ZoneBase):
     def get_dhw_state(self):
         """Gets the DHW state."""
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/"
             "domesticHotWater/%s/status?" % self.dhwId
         )
 
