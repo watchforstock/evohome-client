@@ -1,4 +1,5 @@
 """Test evohomeclient2"""
+
 import requests_mock
 
 from . import EvohomeClient
@@ -135,22 +136,22 @@ GATEWAY_RESPONSE = """
 def test_user_account(mock):  # pylint: disable=invalid-name
     """test that user account is successful"""
     mock.post(
-        "https://tccna.honeywell.com/Auth/OAuth/Token",
+        "https://tccna.resideo.com/Auth/OAuth/Token",
         status_code=200,
         text=AUTH_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount",
         status_code=200,
         text=USER_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
         status_code=200,
         text=INSTALLATION_DATA,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
         status_code=200,
         text=LOCATION_DATA,
     )
@@ -167,22 +168,22 @@ def test_user_account(mock):  # pylint: disable=invalid-name
 def test_temperatures(mock):  # pylint: disable=invalid-name
     """test that user account is successful"""
     mock.post(
-        "https://tccna.honeywell.com/Auth/OAuth/Token",
+        "https://tccna.resideo.com/Auth/OAuth/Token",
         status_code=200,
         text=AUTH_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount",
         status_code=200,
         text=USER_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
         status_code=200,
         text=INSTALLATION_DATA,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
         status_code=200,
         text=LOCATION_DATA,
     )
@@ -197,27 +198,27 @@ def test_temperatures(mock):  # pylint: disable=invalid-name
 def test_gateway(mock):  # pylint: disable=invalid-name
     """test that user account is successful"""
     mock.post(
-        "https://tccna.honeywell.com/Auth/OAuth/Token",
+        "https://tccna.resideo.com/Auth/OAuth/Token",
         status_code=200,
         text=AUTH_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount",
         status_code=200,
         text=USER_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
         status_code=200,
         text=INSTALLATION_DATA,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
         status_code=200,
         text=LOCATION_DATA,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/gateway",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/gateway",
         status_code=200,
         text=GATEWAY_RESPONSE,
     )
@@ -231,27 +232,27 @@ def test_gateway(mock):  # pylint: disable=invalid-name
 def test_single_settings(mock):
     """Test can change different statuses"""
     mock.post(
-        "https://tccna.honeywell.com/Auth/OAuth/Token",
+        "https://tccna.resideo.com/Auth/OAuth/Token",
         status_code=200,
         text=AUTH_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount",
         status_code=200,
         text=USER_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
         status_code=200,
         text=INSTALLATION_DATA,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
         status_code=200,
         text=LOCATION_DATA,
     )
     mock.put(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/sysId/mode",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureControlSystem/sysId/mode",
         status_code=200,
         text="",
     )
@@ -270,27 +271,27 @@ def test_single_settings(mock):
 def test_multi_zone_failure(mock):
     """Confirm that exception is thrown for multiple locations"""
     mock.post(
-        "https://tccna.honeywell.com/Auth/OAuth/Token",
+        "https://tccna.resideo.com/Auth/OAuth/Token",
         status_code=200,
         text=AUTH_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/userAccount",
         status_code=200,
         text=USER_RESPONSE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/installationInfo?userId=userId&includeTemperatureControlSystems=True",
         status_code=200,
         text=INSTALLATION_DATA_MULTIPLE,
     )
     mock.get(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/location/locationId/status?includeTemperatureControlSystems=True",
         status_code=200,
         text=LOCATION_DATA_MULTIPLE,
     )
     mock.put(
-        "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/sysId/mode",
+        "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureControlSystem/sysId/mode",
         status_code=200,
         text="",
     )

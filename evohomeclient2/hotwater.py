@@ -1,4 +1,5 @@
 """Provide handling of the hot water zone."""
+
 import json
 
 import requests
@@ -27,7 +28,7 @@ class HotWater(ZoneBase):
         headers["Content-Type"] = "application/json"
 
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1"
             "/domesticHotWater/%s/state" % self.dhwId
         )
 

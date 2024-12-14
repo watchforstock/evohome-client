@@ -1,4 +1,5 @@
 """Provides handling of a control system."""
+
 import json
 import logging
 
@@ -56,7 +57,7 @@ class ControlSystem(
             }
 
         response = requests.put(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1"
             "/temperatureControlSystem/%s/mode" % self.systemId,
             data=json.dumps(data),
             headers=headers,
@@ -110,6 +111,9 @@ class ControlSystem(
                 "name": "",
                 "temp": self.hotwater.temperatureStatus["temperature"],
                 "setpoint": "",
+                "activefaults": self.hotwater.activeFaults,
+                "setpointmode": "",
+                "setpointend": None,
             }
 
         for zone in self._zones:
@@ -119,10 +123,15 @@ class ControlSystem(
                 "name": zone.name,
                 "temp": None,
                 "setpoint": zone.setpointStatus["targetHeatTemperature"],
+                "activefaults": zone.activeFaults,
+                "setpointmode": zone.setpointStatus["setpointMode"],
+                "setpointend": None,
             }
 
             if zone.temperatureStatus["isAvailable"]:
                 zone_info["temp"] = zone.temperatureStatus["temperature"]
+            if zone.setpointStatus.get("until"):
+                zone_info["setpointend"] = zone.setpointStatus["until"]
             yield zone_info
 
     def zone_schedules_backup(self, filename):

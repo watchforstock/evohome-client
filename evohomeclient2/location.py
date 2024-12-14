@@ -1,4 +1,5 @@
 """Provide handling of a location."""
+
 import requests
 
 from .gateway import Gateway
@@ -30,7 +31,7 @@ class Location(
         """Retrieve the location status."""
         # pylint: disable=protected-access
         response = requests.get(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/"
             "location/%s/status?includeTemperatureControlSystems=True"
             % self.locationId,
             headers=self.client._headers(),

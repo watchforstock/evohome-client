@@ -1,4 +1,5 @@
 """Provide handling of individual zones."""
+
 import json
 
 import requests
@@ -18,7 +19,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
         """Get the schedule for the given zone."""
         # pylint: disable=protected-access
         response = requests.get(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/%s/%s/schedule"
             % (self.zone_type, self.zoneId),
             headers=self.client._headers(),
         )
@@ -57,7 +58,7 @@ class ZoneBase(object):  # pylint: disable=useless-object-inheritance
         headers["Content-Type"] = "application/json"
 
         response = requests.put(
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1/%s/%s/schedule"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1/%s/%s/schedule"
             % (self.zone_type, self.zoneId),
             data=zone_info,
             headers=headers,
@@ -98,7 +99,7 @@ class Zone(ZoneBase):
     def _set_heat_setpoint(self, data):
         # pylint: disable=protected-access
         url = (
-            "https://tccna.honeywell.com/WebAPI/emea/api/v1"
+            "https://tccna.resideo.com/WebAPI/emea/api/v1"
             "/temperatureZone/%s/heatSetpoint" % self.zoneId
         )
 
