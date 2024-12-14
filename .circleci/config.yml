@@ -24,7 +24,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            pip install nose requests_mock coverage black imp
+            pip install pynose requests_mock coverage black
       - run:
           command: |
             mkdir test-results
