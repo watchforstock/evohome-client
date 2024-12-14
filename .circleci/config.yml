@@ -72,12 +72,12 @@ jobs: # A basic unit of work in a run
             echo -e " " >> ~/.pypirc
             echo -e "[pypi]" >> ~/.pypirc
             echo -e "repository = https://upload.pypi.org/legacy/" >> ~/.pypirc
-            echo -e "username = watchforstock" >> ~/.pypirc
+            echo -e "username = __token__" >> ~/.pypirc
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
             echo -e " " >> ~/.pypirc
             echo -e "[test]" >> ~/.pypirc
             echo -e "repository = https://test.pypi.org/legacy/" >> ~/.pypirc
-            echo -e "username = watchforstock" >> ~/.pypirc
+            echo -e "username = __token__" >> ~/.pypirc
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
       - run:
           name: upload to pypi
