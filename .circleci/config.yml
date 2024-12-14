@@ -12,7 +12,7 @@ jobs: # A basic unit of work in a run
       # - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - run:
           command: |
-            sudo pip install nose requests_mock coverage pylint
+            pip install nose requests_mock coverage pylint
       - run:
           command: |
             mkdir test-results
