@@ -24,7 +24,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            sudo pip install nose requests_mock coverage black
+            pip install nose requests_mock coverage black
       - run:
           command: |
             mkdir test-results
@@ -47,7 +47,7 @@ jobs: # A basic unit of work in a run
       - checkout
       - run:
           command: |
-            sudo pip install nose requests_mock coverage twine
+            pip install nose requests_mock coverage twine
       - run:
           command: |
             pip install requests
